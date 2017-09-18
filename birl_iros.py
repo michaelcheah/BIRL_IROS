@@ -69,7 +69,7 @@ def main():
                 print "servo pos: ", servo
         if task == "1":
             print "Begin challenge 1..."
-            i1.begin(c,ser_ee)
+            i1.begin(c,ser_ee,1)
         if task == "2":
             print "Begin challenge 2..."
             i2.begin(c,ser_ee)
