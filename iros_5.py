@@ -29,6 +29,11 @@ def begin(c,ser_ee):
     demand_Grip = dict(ee_home)
     msg = ic.safe_move(c,ser_ee,Pose=dict(iw.grab_joints),Grip=demand_Grip,CMD=2)
 
+    ## Add Twist
+    current_Pose = get_ur_position(c,CMD=1)
+    new_rx = current_Pose[3] + 20   # Rotate in Z through 180 degrees
+    Pose_rot = {"x":current_Pose[0],"y":current_Pose[1],"z":current_Pose[2],"rx":new_rx,"ry":current_Pose[4],"rz":new_z}
+
     # Goto position of USB light
     demand_Pose = dict(home)
     demand_Pose["x"] = x_u
@@ -73,7 +78,7 @@ def begin(c,ser_ee):
     demand_Pose["z"] = height_u + 40
     msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
-    # Push in  
+    # Push in
     demand_Pose["z"] = height_u - 5
     msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
