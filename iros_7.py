@@ -22,27 +22,27 @@ act_objects= [60, 60, 60, 60, 60, 60]
 
 
 def begin(c,ser_ee):
-    for i in range(0,7):
+    for i in range(0,6):
         # Get paramters and put into the following data structure
-        params = [0, x_pos, y_pos, ori]         # First item in the list defines the object type - i.e. circle - 0, rectangle 1, triangle 2 etc. etc.
+        params = [0, x_pos, y_pos, ori]     # where the first item is the number that states the object type: 0 = cirlce, 1 = rect, 2 = triangle etc.
 
         demand_Grip = dict(iw.ee_home)
         demand_Grip["act"]=act_objects[params[0]]
-        msg = ic.safe_move(c,ser_ee,Pose=dict(iw.home_joints),Grip=demand_Grip,CMD=2)
+        msg = ic.safe_move(c,ser_ee,Pose=dict(iw.home_joints),Grip=demand_Grip,CMD=4)
 
         # Go to X,Y centre of the location
         demand_Pose["x"] = params[1]
         demand_Pose["y"] = params[2]
-        msg = ic.safe_move(c,ser_ee,Pose=demand_Pose,Grip=demand_Grip,CMD=2)
+        msg = ic.safe_move(c,ser_ee,Pose=demand_Pose,Grip=demand_Grip,CMD=4)
 
         ## Set orientation
         demand_Pose = get_ur_position(c,3)
         demand_Pose["rz"] = params[3]
-        msg = ic.safe_move(c,ser_ee,Pose=demand_Pose,Grip=demand_Grip,CMD=2)
+        msg = ic.safe_move(c,ser_ee,Pose=demand_Pose,Grip=demand_Grip,CMD=4)
 
         # Move down to Grasp
         demand_Pose["z"] = height_pick
-        msg = ic.safe_move(c,ser_ee,Pose=demand_Pose,Grip=demand_Grip,CMD=2)
+        msg = ic.safe_move(c,ser_ee,Pose=demand_Pose,Grip=demand_Grip,CMD=4)
 
         ## Close Gripper
         demand_Grip["servo"]=0
@@ -50,26 +50,27 @@ def begin(c,ser_ee):
 
         # Pick up object
         demand_Pose["z"] = height_pick +90
-        msg = ic.safe_move(c,ser_ee,Pose=demand_Pose,Grip=demand_Grip,CMD=2)
+        msg = ic.safe_move(c,ser_ee,Pose=demand_Pose,Grip=demand_Grip,CMD=4)
 
         # Rotate to zero orientation
-        demand_Pose = get_ur_position(c,3)
+        demand_joints = get_ur_position(c,3)
+        demand_Pose = dict(demand_joints)
         demand_Pose["rz"] = 0
-        msg = ic.safe_move(c,ser_ee,Pose=demand_Pose,Grip=demand_Grip,CMD=2)
+        msg = ic.safe_move(c,ser_ee,Pose=demand_Pose,Grip=demand_Grip,CMD=4)
 
         # Move to peg holder
         location = peg_log[params[0]]
         demand_Pose["x"] = location[0]
         demand_Pose["y"] = location[1]
-        msg = ic.safe_move(c,ser_ee,Pose=demand_Pose,Grip=demand_Grip,CMD=2)
+        msg = ic.safe_move(c,ser_ee,Pose=demand_Pose,Grip=demand_Grip,CMD=4)
 
         # Lower
         demand_Pose["z"] = height_place
-        msg = ic.safe_move(c,ser_ee,Pose=demand_Pose,Grip=demand_Grip,CMD=2)
+        msg = ic.safe_move(c,ser_ee,Pose=demand_Pose,Grip=demand_Grip,CMD=4)
 
         # Release
         demand_Grip["servo"]= 90
         msg = ic.end_effector_move(ser_ee, demand_Grip)
 
         # Raise from peg
-        msg = ic.safe_move(c,ser_ee,Pose=dict(iw.home_joints),Grip=demand_Grip,CMD=2)
+        msg = ic.safe_move(c,ser_ee,Pose=dict(iw.home_joints),Grip=demand_Grip,CMD=4)
