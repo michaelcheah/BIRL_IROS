@@ -36,56 +36,55 @@ mx_2 = 200
 my_2 = 300
 
 #ic.socket_send(c,sCMD=202)
-    def begin(c,ser_ee):
-            # Home for end effector and actuator
-        demand_Grip = dict(ee_home)
-        demand_Grip = act_spoon
-        msg = ic.safe_move(c,ser_ee,Pose=dict(iw.grab_joints),Grip=demand_Grip,CMD=2)
+def begin(c,ser_ee):
+    # Home for end effector and actuator
+    demand_Grip = dict(ee_home)
+    demand_Grip = act_spoon
+    msg = ic.safe_move(c,ser_ee,Pose=dict(iw.grab_joints),Grip=demand_Grip,CMD=2)
 
-        # Goto XY position for the spoon
-        demand_Pose = dict(home)
-        demand_Pose["x"]=mx_1
-        demand_Pose["y"]=my_1
-        msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
+    # Goto XY position for the spoon
+    demand_Pose = dict(home)
+    demand_Pose["x"]=mx_1
+    demand_Pose["y"]=my_1
+    msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
-        # Goto correct orientation
-        get_grasping_coords(p_centre,p_edge,height)
+    # Goto correct orientation
+    get_grasping_coords(p_centre,p_edge,height)
 
-        # Grasp spoon
-        demand_Grip["servo"]=0
-        msg = ic.end_effector_move(ser_ee,demand_Grip)
+    # Grasp spoon
+    demand_Grip["servo"]=0
+    msg = ic.end_effector_move(ser_ee,demand_Grip)
 
-        # Lift spoon
-        demand_Pose["z"]=cup_height + 20
-        msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
+    # Lift spoon
+    demand_Pose["z"]=cup_height + 20
+    msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
-        ## Move to second cup x, y
-        demand_Pose = dict(home)
-        demand_Pose["x"]=mx_2
-        demand_Pose["y"]=my_2
-        msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
+    ## Move to second cup x, y
+    demand_Pose = dict(home)
+    demand_Pose["x"]=mx_2
+    demand_Pose["y"]=my_2
+    msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
-        ## Lower spoon
-        demand_Pose["z"]=cup_height-spoon_bowl
-        msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
+    ## Lower spoon
+    demand_Pose["z"]=cup_height-spoon_bowl
+    msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
-        ## Stir spoon
-        add_stir = [0, stir_radius, 0, -stir_radius, 0]
-        for j in range (0,1):
-            for i in range (0,3):
-                demand_Pose["x"]=mx_2 + add_stir[i+1]
-                demand_Pose["y"]=my_2 + add_stir[i]
-                msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
+    ## Stir spoon
+    add_stir = [0, stir_radius, 0, -stir_radius, 0]
+    for j in range (0,1):
+        for i in range (0,3):
+            demand_Pose["x"]=mx_2 + add_stir[i+1]
+            demand_Pose["y"]=my_2 + add_stir[i]
+            msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
-        ## Lift spoon
-        demand_Pose["z"]=cup_height+20
-        msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4
-
-    ## Home
-        demand_Pose = dict(home)
-        demand_Pose["x"]=mx_1
-        demand_Pose["y"]=my_1
-        msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
+            ## Lift spoon
+            demand_Pose["z"]=cup_height+20
+            msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
+            ## Home
+            demand_Pose = dict(home)
+            demand_Pose["x"]=mx_1
+            demand_Pose["y"]=my_1
+            msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
 
 
