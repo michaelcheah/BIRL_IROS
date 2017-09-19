@@ -208,3 +208,4 @@ def angle_grasp(c,ser_ee,x,y,z,orientation,angle_of_attack=attack_angle):
         current_Pose = ic.get_ur_position(c,1)
         demand_Pose = {"x":current_Pose[0],"y":current_Pose[1],"z":current_Pose[2],"rx":rx,"ry":ry,"rz":rz}
         msg = ic.safe_ur_move(c,Pose=dict(demand_Pose),CMD=8)
+
