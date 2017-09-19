@@ -24,7 +24,7 @@ act_objects= [60, 60, 60, 60, 60, 60]
 def begin(c,ser_ee):
     for i in range(0,7):
         # Get paramters and put into the following data structure
-        params = [0, x_pos, y_pos, ori]
+        params = [0, x_pos, y_pos, ori]         # First item in the list defines the object type - i.e. circle - 0, rectangle 1, triangle 2 etc. etc.
 
         demand_Grip = dict(iw.ee_home)
         demand_Grip["act"]=act_objects[params[0]]
