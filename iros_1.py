@@ -58,16 +58,15 @@ def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
 
     print "MX: ", mx
     print "MY: ", my
-
-    #motion stuff: pick mug
-    # Set tool to iros_1
-    ic.socket_send(c,sCMD=201)
     
     # Home
     demand_Grip = dict(iw.ee_home)
     demand_Grip["act"]=60
     msg = ic.safe_move(c,ser_ee,Pose=dict(iw.home_joints),Grip=demand_Grip,CMD=2)
 
+    # Set tool to iros_1
+    ic.socket_send(c,sCMD=201)
+    
     demand_Pose = dict(iw.home)
     demand_Pose["x"]=mx + radius_mug/1.41421
     demand_Pose["y"]=my - radius_mug/1.41421
