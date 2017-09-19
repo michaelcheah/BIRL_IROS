@@ -44,7 +44,7 @@ def begin(c,ser_ee):
     demand_Pose["z"]=hz
     msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
-    demand_Grip["servo"]=0
+    demand_Grip["servo"]=30
     msg = ic.end_effector_move(ser_ee,Grip=demand_Grip)
 
     demand_Pose["z"]=hz+100
@@ -73,7 +73,7 @@ def begin(c,ser_ee):
 
     current_Pose = ic.get_ur_position(c,1)
     demand_Pose = {"x":current_Pose[0], "y":current_Pose[1], "z":hx+20, "rx":current_Pose[3], "ry":current_Pose[4], "rz":current_Pose[5]} 
-    demand_Grip["servo"]=80
+    demand_Grip["servo"]=120
     msg = ic.safe_move(c,ser_ee,Pose=demand_Pose,CMD=4)
 
     demand_Pose["z"]=current_Pose[2]

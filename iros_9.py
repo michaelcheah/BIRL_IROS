@@ -19,20 +19,21 @@ cup1_offset = 30    # How close to go to the centre of the cup to get the straw
 straw_height = 200
 cup2_height = 150
 
-cup_1 = [-100, -100]      # Location of cup 1
-cup_2 = [-130, -100]      # Location of cup 2
+cup_1 = [-400, -400]      # Location of cup 1
+cup_2 = [-500, -400]      # Location of cup 2
 
 def begin(c,ser_ee):
-    ic.socket_send(c,sCMD=201)
     # Home
     demand_Grip = dict(iw.ee_home)
     demand_Grip["act"]=act_straw
     msg = ic.safe_move(c,ser_ee,Pose=dict(iw.home_joints),Grip=demand_Grip,CMD=2)
 
+    ic.socket_send(c,sCMD=201)
+
     # Go to waypoint to get correct orientation
-    demand_Grip = dict(iw.grabbing_joints_waypoint)
+    demand_Pose = dict(iw.grabbing_joints_waypoint)
     demand_Pose["x"]=cup_1[0]
-    msg = ic.safe_move(c,ser_ee,Pose=dict(iw.home_joints),Grip=demand_Grip,CMD=2)
+    msg = ic.safe_move(c,ser_ee,Pose=demand,Grip=demand_Grip,CMD=2)
 
     # Keep same joint orientation and just move in x, y and z
     #Move to straw height_mug
@@ -44,7 +45,7 @@ def begin(c,ser_ee):
     msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
     #Grasp straw
-    demand_Grip["servo"]=5
+    demand_Grip["servo"]=30
     msg = ic.end_effector_move(ser_ee,demand_Grip)
 
     # Lift Straw
@@ -57,10 +58,14 @@ def begin(c,ser_ee):
     msg = ic.safe_move(c,ser_ee,Pose=dict(iw.home_joints),Grip=demand_Grip,CMD=2)
 
     # Lower straw into cup
-     demand_Pose["z"]=cup2_height
-     msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
+    demand_Pose["z"]=cup2_height
+    msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
-    # Release straw move up
+    # Release straw
+    demand_Grip["servo"]=120
+    msg = ic.end_effector_move(ser_ee,demand_Grip)
+
+    # Move up
      demand_Pose["z"]=cup2_height
      msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 

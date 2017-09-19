@@ -14,7 +14,7 @@ import iros_waypoints as iw
 #import vision_copy as vc
 
 def begin(c,ser_ee):
-
+    act_usb=70
     # Location of USB top middle
 
     x_u = 100
@@ -26,8 +26,9 @@ def begin(c,ser_ee):
     y_l = 150
     height_l = 50
 
-    demand_Grip = dict(ee_home)
-    msg = ic.safe_move(c,ser_ee,Pose=dict(iw.grab_joints),Grip=demand_Grip,CMD=2)
+    demand_Grip = dict(iw.ee_home)
+    demand_Grip["act"]=act_usb
+    msg = ic.safe_move(c,ser_ee,Pose=dict(iw.home_joints),Grip=demand_Grip,CMD=2)
 
     ## Add Twist
     current_Pose = get_ur_position(c,CMD=1)
@@ -45,7 +46,7 @@ def begin(c,ser_ee):
     msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
     # Close Gripper
-    demand_Grip["servo"]=10
+    demand_Grip["servo"]=30
     msg = ic.end_effector_move(ser_ee,demand_Grip)
 
     #Pull out
@@ -57,7 +58,7 @@ def begin(c,ser_ee):
     msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
     # Release Gripper
-    demand_Grip["servo"]=80
+    demand_Grip["servo"]=120
     msg = ic.end_effector_move(ser_ee,demand_Grip)
 
 
@@ -71,7 +72,7 @@ def begin(c,ser_ee):
     msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
     # Close Gripper
-    demand_Grip["servo"]=10
+    demand_Grip["servo"]=30
     msg = ic.end_effector_move(ser_ee,demand_Grip)
 
     # Pull out
@@ -83,5 +84,5 @@ def begin(c,ser_ee):
     msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
     # Release Gripper
-    demand_Grip["servo"]=80
+    demand_Grip["servo"]=120
     msg = ic.end_effector_move(ser_ee,demand_Grip)

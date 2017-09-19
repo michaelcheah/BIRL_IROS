@@ -24,7 +24,7 @@ saucer_waypoint = {"x": -4.28, "y": -101.02, "z": 122.04, "rx": -103.10, "ry": -
 def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
     #object grasping parameters
     act_mug=80
-    act_saucer=80
+    act_saucer=75
     height_mug=20.0
     height_saucer=5.0
     radius_mug=43.0
@@ -75,16 +75,16 @@ def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
     demand_Pose["z"]=height_mug
     msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
-    demand_Grip["servo"]=10
+    demand_Grip["servo"]=40
     msg = ic.end_effector_move(ser_ee,demand_Grip)
     
     demand_Grip["act"]=act_mug
     msg = ic.end_effector_move(ser_ee,demand_Grip)
     
-    demand_Grip["servo"]=50
+    demand_Grip["servo"]=80
     msg = ic.end_effector_move(ser_ee,demand_Grip)
     
-    demand_Grip["servo"]=0
+    demand_Grip["servo"]=30
     msg = ic.end_effector_move(ser_ee,demand_Grip)
 
     time.sleep(1)
@@ -99,7 +99,7 @@ def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
     demand_Pose["z"]=height_mug+height_saucer
     msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
-    demand_Grip["servo"]=80
+    demand_Grip["servo"]=120
     msg = ic.end_effector_move(ser_ee,demand_Grip)
 
     demand_Pose["z"]=120
@@ -118,13 +118,13 @@ def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
     msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
     demand_Pose["z"]=height_saucer+40
-    demand_Grip["servo"]=30
+    demand_Grip["servo"]=60
     msg = ic.safe_move(c,ser_ee,Pose=demand_Pose,Grip=demand_Grip,CMD=4)
 
     time.sleep(0.2)
 
     demand_Pose["z"]=height_saucer
-    demand_Grip["servo"]=0
+    demand_Grip["servo"]=30
     msg = ic.safe_move(c,ser_ee,Pose=demand_Pose,Grip=demand_Grip,CMD=4)
 
     time.sleep(1)
@@ -143,11 +143,11 @@ def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
     msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
     demand_Pose["z"]=height_saucer
-    demand_Grip["servo"]=20
+    demand_Grip["servo"]=60
     msg = ic.safe_move(c,ser_ee,Pose=demand_Pose,Grip=demand_Grip,CMD=4)
 
     demand_Pose["z"]=height_saucer+40
-    demand_Grip["servo"]=80
+    demand_Grip["servo"]=120
     msg = ic.safe_move(c,ser_ee,Pose=demand_Pose,Grip=demand_Grip,CMD=4)
 
     demand_Pose["z"]=current_Pose[2]
