@@ -39,9 +39,6 @@ def begin(c,ser_ee):
     #vision stuff: get mug and saucer position
     # mug and saucer centre positions
     #mx,my,sx,sy = mug_saucer_pos
-
-    print "MX: ", mx
-    print "MY: ", my
     
     ## Location of first mug ()
     p_pix = [p_circle[0],p_circle[1]]
