@@ -8,10 +8,14 @@ import math
 import cv2
 import imutils
 from matplotlib import pyplot as plt
+import os
 
 import iros_interface_cmds as ic
 import iros_waypoints as iw
 #import vision_copy as vc
+
+import iros_vision_tools as ivt
+import iros_vision_functions as ivfunc
 
 def begin(c,ser_ee):
     ## Object parameters
@@ -21,15 +25,46 @@ def begin(c,ser_ee):
     spoon_height = 10
     stir_radius = cup_radius - 10
     act_spoon = 10
-
+    
+    task_img_3 = ivt.capture_pic(CAMERA,1)
+    cv2.imwrite(os.path.join(PATH_TO_TASK_IMAGES, 'task_img_3.jpg'), task_img_3)
+    
+    crop_task_img_3 = ivt.crop_out(task_img_3, crop_points)
+    
+    img_3a = task_img_3[0:180, 0:-1]
+    img_3b = ivt.black_out(image, [180,-1,0,-1])
+    
+    p_circle, spoon = ivfunc.find_spoon(img_3a, show=True)
+    
+    #vision stuff: get mug and saucer position
+    # mug and saucer centre positions
+    #mx,my,sx,sy = mug_saucer_pos
+    
     ## Location of first mug ()
-    p_centre = [-400, -400]
-    p_edge = [-350, -400]
+    p_pix = [p_circle[0],p_circle[1]]
+    px,py = ivt.pix3world(p1, inverse, p_pix)
+    px = px[0,0]
+    py = py[0,0]
+    
+    sx,sy = ivt.pix3world(p1, inverse, spoon)
+    sx = sx[0,0]
+    sy = sy[0,0]
+    
+    p_centre = [px, py]
+    p_edge = [sx, sy]
     attack_angle=70
-
-    ## Loction of second mug
-    mx_2 = -500
-    my_2 = -400
+    print "P_CENTRE: ", p_centre
+    print "P_EDGE:   ", p_edge
+    
+    ## Location of Second Mug
+    m_circle, m_cimg = ivt.find_circles(copy.copy(img_3b), 1, param=CAL_PARAM, blur=1, show=False)
+    plt.imshow(cimg)
+    plt.show()
+    m_pix = [m_circle[0],m_circle[1]]
+    mx,my = ivt.pix3world(p1, inverse, m_pix)
+    mx_2 = mx[0,0]
+    my_2 = my[0,0]
+    print "MX, MY: ", mx, my
 
     # Home for end effector and actuator
     demand_Grip = dict(iw.ee_home)
