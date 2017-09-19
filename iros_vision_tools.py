@@ -83,8 +83,9 @@ def check_camera(ports = PORTS):
 
 def find_circles(img, num_circles, param=CAL_PARAM, blur=3, show=True):
     gray = copy.copy(img)
-    plt.imshow(gray)
-    plt.show()
+    if show:
+        plt.imshow(gray)
+        plt.show()
     if len(np.shape(gray))>2:
         gray = cv2.cvtColor(gray, cv2.COLOR_BGR2GRAY)
     
@@ -256,4 +257,11 @@ def pix3world(p1,inverse,pixels):
     # world: x, y
     return C1[0]-weights[0]*DELTA_X,C1[1]-weights[1]*DELTA_Y
 
+def black_out(image, crop_points):
+    img = copy.copy(image)
+    img[0:crop_points[0],:]=0
+    img[:,0:crop_points[2]]=0
+    img[crop_points[1]:,:]=0
+    img[:,crop_points[3]:]=0
+    return img
 
