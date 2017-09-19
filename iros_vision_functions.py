@@ -68,7 +68,7 @@ def find_spoon(image, show=True):
     mindistance = 1000
     box_minsize = 1200
     
-    circles, cimg = ivt.find_circles(copy.copy(img), 0, param=CAL_PARAM, blur=1, show=False)
+    circles, cimg = ivt.find_circles(copy.copy(img), 1, param=CAL_PARAM, blur=1, show=False)
 
     show_img = copy.copy(img)
     show_img = cv2.cvtColor(show_img, cv2.COLOR_RGB2GRAY)
