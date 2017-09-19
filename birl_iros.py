@@ -15,6 +15,7 @@ import math
 import cv2
 import imutils
 from matplotlib import pyplot as plt
+import os
 
 import iros_interface_cmds as ic
 import iros_waypoints as iw
@@ -29,10 +30,13 @@ import iros_8 as i8
 import iros_9 as i9
 import iros_10 as i10
 #import vision_copy as vc
+import iros_vision_functions as ivfunc
+import iros_vision_tools as ivt
 
 def initialize():
     #HOST = "169.254.103.235" # The remote host
     HOST = "192.168.1.105" # The remote host
+    HOST = "169.254.187.178"
     PORT = 30000 # The same port as used by the server
 
     print ".......................Starting Program......................."
@@ -47,8 +51,8 @@ def initialize():
     print "Connected to UR"
     print ""
    
-    ser_ee = serial.Serial('COM5',9600)  # open serial port
-    while ser_ee.is_open==False:
+    ser_ee = serial.Serial('/dev/ttyACM0',9600)  # open serial port
+    while ser_ee.isOpen()==False:
         print "Waiting for serial"
     print ser_ee.name, ": ",ser_ee.readline()         # check which port was really used
     print "Ready"
@@ -60,16 +64,36 @@ def main():
     print c.recv(1024)
     inp = raw_input("Continue?")
     msg = ic.safe_move(c,ser_ee,Pose=dict(iw.home_joints),CMD=2)
+    
+    cali_img = cv2.imread("cali_img.jpg")
+    circles_sorted, crop_points = ivt.run_calibration(cali_img, adjust=False)
+    cali_circles_init = circles_sorted-circles_sorted[0][0]
+    cali_circles=[]
+    for circ in cali_circles_init[0]:
+        cali_circles.append([circ[0], circ[1]])
+
+    print "CALI_CIRCLES", cali_circles
+
+    p1, inverse = ivt.pix3world_cal(cali_circles[0],cali_circles[2], cali_circles[1])
+    
+    CAMERA = 1
+    ivt.check_camera()
+    cam_check = raw_input("Change Camera?: " )
+    if cam_check == "yes":
+        print "Current camera is "+str(CAMERA)
+        CAMERA = raw_input("Which Camera to use?: ")
+        CAMERA = int(CAMERA)
+    
     while True:
         task = raw_input("task: ")
         if task == "s":
             while True:
                 servo = int(raw_input())
-                ic.serial_send(ser_ee,"T",servo)
+                ic.serial_send(ser_ee,"G",servo)
                 print "servo pos: ", servo
         if task == "1":
             print "Begin challenge 1..."
-            i1.begin(c,ser_ee,1)
+            i1.begin(c,ser_ee,p1,inverse,CAMERA,crop_points)
         if task == "2":
             print "Begin challenge 2..."
             i2.begin(c,ser_ee)
@@ -112,5 +136,23 @@ def main():
             demand_Grip["servo"] = int(raw_input("servo: "))
             demand_Grip["tilt"] = int(raw_input("tilt: "))
             msg = ic.safe_move(c,ser_ee,Grip=demand_Grip, CMD=0)
+            
+        if task == "calibrate":
+            while True:
+                ready = raw_input("Ready?: ")
+                if ready == "yes":
+                    cali_img = ivt.capture_pic(CAMERA,1)
+                    circles_sorted, crop_points = ivt.run_calibration(cali_img)
+                    cali_circles_init = circles_sorted-circles_sorted[0][0]
+                    cali_circles=[]
+                    for circ in cali_circles_init[0]:
+                        cali_circles.append([circ[0], circ[1]])
+
+                    print cali_circles
+
+                    p1, inverse = ivt.pix3world_cal(cali_circles[0],cali_circles[2], cali_circles[1])
+                    cv2.imwrite("cali_img.jpg",cali_img)
+                    break
+        
 
 if __name__ == '__main__': main()
