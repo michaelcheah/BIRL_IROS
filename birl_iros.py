@@ -86,12 +86,11 @@ def main():
     
     while True:
         task = raw_input("task: ")
-        if task == "s":
-            ic.serial_send(ser_ee,"A",50)
-            while True:
-                servo = int(raw_input())
-                ic.serial_send(ser_ee,"G",servo)
-                print "servo pos: ", servo
+        if task == "wp":
+            msg = ic.safe_ur_move(c,Pose=dict(i1.saucer_waypoint1_joints),CMD=2)
+            current_Pose = ic.get_ur_position(c,1)
+            demand_Pose = {"x":current_Pose[0], "y":current_Pose[1], "z":current_Pose[2], "rx":i1.saucer_waypoint2["rx"], "ry":i1.saucer_waypoint2["ry"], "rz":i1.saucer_waypoint2["rz"]}
+            msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
         if task == "1":
             print "Begin challenge 1..."
             i1.begin(c,ser_ee,p1,inverse,CAMERA,crop_points)
