@@ -23,13 +23,13 @@ def begin(c,ser_ee):
     act_spoon = 10
 
     ## Location of first mug ()
-    p_centre = [-100, -200]
-    p_edge = [-100, -200]
+    p_centre = [-400, -400]
+    p_edge = [-350, -400]
     attack_angle=70
 
     ## Loction of second mug
-    mx_2 = -200
-    my_2 = -300
+    mx_2 = -500
+    my_2 = -400
 
     # Home for end effector and actuator
     demand_Grip = dict(iw.ee_home)
@@ -40,7 +40,7 @@ def begin(c,ser_ee):
 
     # Goto spoon (TO FINISH)
     x_p, y_p, ori = get_grasping_coords(p_centre,p_edge)
-    angle_grasp(c,ser_ee,x_p,y_p,spoon_height,ori,attack_angle)
+    angle_grasp(c,ser_ee,ori,attack_angle)
 
     current_Joints = ic.get_ur_position(c,3)
     demand_Joints = {"x":current_Joints[0], "y":current_Joints[1], "z":current_Joints[2], "rx":current_Joints[3], "ry":current_Joints[4], "rz":current_Joints[5]+90}
@@ -54,7 +54,7 @@ def begin(c,ser_ee):
     msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
     # Grasp spoon
-    demand_Grip["servo"]=0
+    demand_Grip["servo"]=30
     msg = ic.end_effector_move(ser_ee,demand_Grip)
 
     # Lift spoon
@@ -88,6 +88,7 @@ def begin(c,ser_ee):
     ## Home
     msg = ic.safe_ur_move(c,Pose=dict(iw.home_joints),CMD=2)
 
+    print ".....................Done......................"
 
 def get_grasping_coords(p_centre,p_edge):
     #aoa = 70
@@ -101,7 +102,7 @@ def get_grasping_coords(p_centre,p_edge):
     return float(x[0]), float(y[0]), ori
 
 
-def angle_grasp(c,ser_ee,x,y,z,orientation,angle_of_attack=attack_angle):
+def angle_grasp(c,ser_ee,orientation,angle_of_attack):
     # Break-up rotations into max 90degrees
     thetaz = 0
     if orientation>90:

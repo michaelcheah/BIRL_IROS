@@ -87,6 +87,7 @@ def main():
     while True:
         task = raw_input("task: ")
         if task == "s":
+            ic.serial_send(ser_ee,"A",50)
             while True:
                 servo = int(raw_input())
                 ic.serial_send(ser_ee,"G",servo)
