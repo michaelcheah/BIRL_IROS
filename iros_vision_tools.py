@@ -150,8 +150,8 @@ def sort_circles3(circles):
 def run_calibration(cali_image, adjust=True):
     cali_img = copy.copy(cali_image)
     
-    CAM_CAL_PARAM = {'thresh': [125, 180],
-                'radius': [10,14]}
+    CAM_CAL_PARAM = {'thresh': [125, 160],
+                'radius': [8,10]}
     circles, cimg = find_circles(copy.copy(cali_img), 3, param=CAM_CAL_PARAM, blur=1, show=False)
     if adjust:
         while True:
