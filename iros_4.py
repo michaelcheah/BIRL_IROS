@@ -7,20 +7,44 @@ import math
 import cv2
 import imutils
 from matplotlib import pyplot as plt
+import numpy as np
+import os
 
 import iros_interface_cmds as ic
 import iros_waypoints as iw
 #import vision_copy as vc
 
+import iros_vision_tools as ivt
+import iros_vision_functions as ivfunc
+PATH_TO_TASK_IMAGES = "task_images"
+
 jug_waypoint_joints = {"x": 0.0, "y": 0.0, "z": 0.0, "rx": 0.0, "ry": 0.0, "rz": 0.0}
 
-def begin(c,ser_ee):
+def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
     act_jug=70
     pour_offset=100
 
     #vision stuff
-    mx=[-600,-600,-600]
-    my=[-200,-300,-400]
+    task_img_4 = ivt.capture_pic(CAMERA,1)
+    cv2.imwrite(os.path.join(PATH_TO_TASK_IMAGES, 'task_img_4.jpg'), task_img_4)
+    
+    crop_task_img_4 = ivt.crop_out(task_img_4, crop_points)
+    CAL_PARAM = {'thresh': [75, 100],
+                 'radius': [30,45]}
+    m_circle, m_cimg = ivt.find_circles(copy.copy(img_4), 3, param=CAL_PARAM, blur=1, show=False)
+    plt.imshow(m_cimg)
+    plt.show()
+    
+    mx=[]
+    my=[]
+    for mug in range(3):
+        m_pix = [m_circle[0][mug][0], m_circle[0][mug][1]]
+        mx_,my_ = ivt.pix3world(p1, inverse, m_pix)
+        mx.append(mx_[0,0])
+        my.append(my_[0,0])
+
+    print "MX: ", mx
+    print "MY: ", my
 
     #motion stuff: pick mug
     # Home
