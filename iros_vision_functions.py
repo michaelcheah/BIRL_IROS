@@ -109,3 +109,146 @@ def find_spoon(image, show=True):
         plt.imshow(cimg)
         plt.show()
     return circles[0], fnode 
+from numpy import linalg
+
+def extract_shape_contours(image, threshold=120, show=True):
+    img = copy.copy(image)
+    gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+    gray_flat = gray[np.isfinite(gray)]
+    black, white = np.min(gray_flat), np.max(gray_flat)
+    if show:
+        plt.figure('Gray Image and Histogram')
+        
+        plt.subplot(1, 2, 1)
+        plt.imshow(img)
+        plt.title('Gray Image')
+        
+        plt.subplot(1,2,2)
+        plt.hist(gray_flat, bins=np.linspace(black,white, 20), histtype='step')
+        plt.xlim(black, white)
+        plt.title('Gray Histogram')
+        plt.xlabel('Value')
+        plt.ylabel('Count')
+        plt.show()
+        
+    gray_mask = np.zeros_like(gray)
+    gray_mask[gray<threshold] = 250
+    gray_mask[-20:-1,:] = 0
+    gray_mask[:, 0:30] = 0
+    gray_mask[:, -20:-1] = 0
+    
+    
+    edged, edg_img, cnts, hierarchy=ivt.extract_contours(gray_mask, 
+                                                         min_thresh=60, max_thresh=250, 
+                                                         blur=3, dilate=1, erode=1, 
+                                                         cnt_mode=cv2.RETR_EXTERNAL)
+    
+    if show:
+        plt.figure("Extracted Shapes")
+        plt.subplot(1,2,1)
+        plt.imshow(gray_mask)
+        plt.subplot(1,2,2)
+        plt.imshow(edged)
+        plt.show()
+    
+    return cnts, hierarchy
+
+def extract_shape_list(image, threshold, show=True):
+    cnts, hierarchy = extract_shape_contours(image, threshold=threshold, show=show)
+    
+    show_img = copy.copy(image)
+    show_img = cv2.cvtColor(show_img, cv2.COLOR_RGB2GRAY)
+    show_img = cv2.cvtColor(show_img, cv2.COLOR_GRAY2RGB)
+    shape_list = []
+    
+    for i,c in enumerate(cnts):
+        shape_object = {}
+        
+        if hierarchy[0][i][3]!=-1:
+            print "Not External shape"
+            continue
+        
+        if cv2.contourArea(c) < 150:
+            print "Too small"
+            continue
+        
+        approx = detect(c)
+        cmax = np.max(approx, axis = 0)
+        cX, cY = cmax[0][0], cmax[0][1]
+        
+        cv2.drawContours(show_img, [approx], -1, (0,255,0), 1)
+        
+        # Find Shape Centre
+        centre = np.mean(approx, axis=0)
+        shape_object['centre']=centre
+
+        if len(approx)==3:
+            shape=2
+            point1 = approx[0]
+            point2 = (approx[1]+approx[2])/2
+            direction = (point1-point2)/linalg.norm(point1-point2)
+        elif len(approx)==4:
+            vect1 = approx[0]-approx[1]
+            vect2 = approx[1]-approx[2]
+            
+            len_side1 = linalg.norm(vect1)
+            len_side2 = linalg.norm(vect2)
+            long_side, short_side = 0,0
+            if len_side1 > len_side2:
+                long_side = len_side1
+                short_side = len_side2
+                direction = vect1/linalg.norm(vect1)
+                point1 = (approx[1]+approx[2])/2
+                point2 = (approx[3]+approx[0])/2
+            else:
+                long_side = len_side2
+                short_side = len_side1
+                direction = vect2/linalg.norm(vect2)
+                point1 = (approx[0]+approx[1])/2
+                point2 = (approx[2]+approx[3])/2
+
+            aspect = float(long_side)/short_side
+
+            if aspect < 1:
+                aspect = 1/aspect
+            if aspect>1.4:
+                shape = 1
+            else:
+                shape = 3
+                
+        elif len(approx) == 5:
+            shape = 4
+            point1 = approx[0]
+            point2 = (approx[2]+approx[3])/2
+            direction = (point1-point2)/linalg.norm(point1-point2)
+        else:
+            shape = 0
+            radius = centre - approx[0]
+            direction = radius/linalg.norm(radius)
+            point1 = centre - radius
+            point2 = centre + radius
+            
+        dir_rat = direction[0][1]/-direction[0][0]
+        angle = np.arctan(dir_rat)*180/np.pi
+        
+        shape_object['ratio']=dir_rat
+        shape_object['angle'] = angle
+        shape_object['shape']=shape
+        shape_object['approx']=approx
+        shape_object['point1']=point1
+        shape_object['point2']=point2
+        cv2.circle(show_img, (int(point1[0][0]), int(point1[0][1])), 2, (0,255,255),2)
+        cv2.circle(show_img, (int(point2[0][0]), int(point2[0][1])), 2, (255,0,255),2)
+        cv2.putText(show_img, str(shape), (cX, cY), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        shape_list.append(shape_object)
+    if show:
+        plt.figure("Labelled Shapes")
+        plt.imshow(show_img)
+        plt.show()
+    return shape_list
+                
+def detect(c):
+    # Approximate Shape
+    peri = cv2.arcLength(c, True)
+    approx = cv2.approxPolyDP(c, 0.03 * peri, True)
+    return approx

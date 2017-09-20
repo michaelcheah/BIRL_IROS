@@ -111,7 +111,7 @@ def main():
             i6.begin(c,ser_ee)
         if task == "7":
             print "Begin challenge 7..."
-            i7.begin(c,ser_ee)
+            i7.begin(c,ser_ee,p1,inverse,CAMERA,crop_points)
         if task == "8":
             print "Begin challenge 8..."
             i8.begin(c,ser_ee)

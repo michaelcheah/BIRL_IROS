@@ -7,10 +7,16 @@ import math
 import cv2
 import imutils
 from matplotlib import pyplot as plt
+import numpy as np
+import os
 
 import iros_interface_cmds as ic
 import iros_waypoints as iw
 #import vision_copy as vc
+
+import iros_vision_tools as ivt
+import iros_vision_functions as ivfunc
+PATH_TO_TASK_IMAGES = "task_images"
 
 # Pre defined parameters
 peg_log =[[-100, -100],[-100, -110],[-100, -120],[-100, -130],[-100, -140]]
@@ -19,10 +25,28 @@ height_place = 40
 
 act_objects= [60, 60, 60, 60, 60, 60]
 
-
-
-def begin(c,ser_ee):
+def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
     for i in range(0,6):
+        # Vision - Extract the list of shapes
+        task_img_7 = ivt.capture_pic(CAMERA,1)
+        cv2.imwrite(os.path.join(PATH_TO_TASK_IMAGES, 'task_img_7'+str(i)+'.jpg'), task_img_7)
+        crop_task_img_4 = ivt.crop_out(task_img_7, crop_points)
+        
+        shape_list = ivfunc.extract_shape_list(task_img_7, threshold=120, show=True)
+        
+        if len(shape_list)==0:
+            print "No more shapes left"
+            print "Expected "+str(5-i)+" more shapes"
+            continue
+        piece = shape_list[0]
+        x1 = piece['point1'][0][0]
+        y1 = piece['point1'][0][1]
+        x2 = piece['point2'][0][0]
+        y2 = piece['point2'][0][1]
+        
+        params = [piece['shape'], x1, y1, x2, y2]
+        
+        # Get paramters and put into the following data structure
         # Get paramters and put into the following data structure
         params = [0, x_pos, y_pos, ori]     # where the first item is the number that states the object type: 0 = cirlce, 1 = rect, 2 = triangle etc.
 
