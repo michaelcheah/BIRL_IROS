@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # Scripts for iros challenge 8: pick up a hammer
 #                               use this to drive 5 nails into foam board
+# ic.serial_send(ser_ee,"H",var)  0-127
 import time
 import copy
 import math

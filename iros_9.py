@@ -66,8 +66,8 @@ def begin(c,ser_ee):
     msg = ic.end_effector_move(ser_ee,demand_Grip)
 
     # Move up
-     demand_Pose["z"]=cup2_height
-     msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
+    demand_Pose["z"]=cup2_height
+    msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
-     # Return home
-     msg = ic.safe_move(c,ser_ee,Pose=dict(iw.home_joints),Grip=demand_Grip,CMD=2)
+    # Return home
+    msg = ic.safe_move(c,ser_ee,Pose=dict(iw.home_joints),Grip=demand_Grip,CMD=2)
