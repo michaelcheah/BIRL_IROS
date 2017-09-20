@@ -19,11 +19,13 @@ import iros_vision_tools as ivt
 import iros_vision_functions as ivfunc
 PATH_TO_TASK_IMAGES = "task_images"
 
+stir_waypoint_joints = {"x": 46.91, "y": -83.89, "z": 78.77, "rx": -78.57, "ry": -95.53, "rz": 4.40}
+
 def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
     ## Object parameters
     cup_radius = 40
     cup_height = 60
-    spoon_bowl = 0         # lenght of spoon bowl (to be convered when stirring)
+    spoon_bowl = -20         # lenght of spoon bowl (to be convered when stirring)
     spoon_height = 20
     stir_radius = cup_radius - 20
     act_spoon = 75
@@ -101,26 +103,32 @@ def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
     msg = ic.safe_ur_move(c,Pose=demand_Joints,CMD=2)
 
     current_Pose = ic.get_ur_position(c,1)
-    demand_Pose = {"x":current_Pose[0], "y":current_Pose[1], "z":cup_height+spoon_height, "rx":current_Pose[3], "ry":current_Pose[4], "rz":current_Pose[5]} 
+    demand_Pose = {"x":current_Pose[0], "y":current_Pose[1], "z":cup_height+spoon_height+80, "rx":current_Pose[3], "ry":current_Pose[4], "rz":current_Pose[5]} 
     msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
     demand_Pose["x"]=x_p
     demand_Pose["y"]=y_p
     msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
+    demand_Pose["z"]=cup_height+spoon_height
+    msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
+
     # Grasp spoon
     demand_Grip["servo"]=30
     msg = ic.end_effector_move(ser_ee,demand_Grip)
 
+    time.sleep(0.5)
+
     # Lift spoon
-    demand_Pose["z"]=cup_height+spoon_height+60
+    demand_Pose["z"]=cup_height+spoon_height+80
     msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
+    # Tilt spoon
+    msg = ic.safe_ur_move(c,Pose=dict(stir_waypoint_joints),CMD=2)
+
     ## Move to second cup x, y
-    demand_Pose = dict(iw.home)
-    demand_Pose["x"]=mx_2
-    demand_Pose["y"]=my_2
-    demand_Pose["z"]=cup_height+spoon_height+60
+    current_Pose = ic.get_ur_position(c,1)
+    demand_Pose = {"x":mx_2, "y":my_2, "z":cup_height+spoon_height+80, "rx":current_Pose[3], "ry":current_Pose[4], "rz":current_Pose[5]} 
     msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
     ## Lower spoon
@@ -136,7 +144,7 @@ def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
             msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
     ## Lift spoon
-    demand_Pose["z"]=cup_height+spoon_height+60
+    demand_Pose["z"]=cup_height+spoon_height+80
     msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
     ic.socket_send(c,sCMD=200)
