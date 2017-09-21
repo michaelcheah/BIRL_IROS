@@ -24,6 +24,7 @@ jug_waypoint_joints_2 = {"x": 76.25, "y": -73.27, "z": 141.24, "rx": -155.85, "r
 lift_height = 20
 pour_angle_1 = 60
 unpour = 90
+pour_offset
 
 def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
     act_jug=70
@@ -73,9 +74,8 @@ def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
     demand_Pose["z"] = lift_height
     msg = ic.safe_ur_move(c,Pose=dict(demand_Pose),CMD=4)
 
-
     # Go to location of the cup
-    demand_Pose["x"] = mx[0]
+    demand_Pose["x"] = mx[0] + pour_offset
     demand_Pose["y"] = my[0]
     msg = ic.safe_ur_move(c,Pose=dict(demand_Pose),CMD=4)
 
@@ -88,7 +88,7 @@ def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
     time.sleep(1)
 
     # Stop pour_angle_1
-    demand_Joints["rx"] = pour_angle_1
+    demand_Joints["rx"] = unpour
     msg = ic.safe_ur_move(c,Pose=dict(demand_Pose),CMD=4)
 
     '''
