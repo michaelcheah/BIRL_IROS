@@ -265,3 +265,88 @@ def black_out(image, crop_points):
     img[:,crop_points[3]:]=0
     return img
 
+def find_circles2(img, num_circles, param=CAL_PARAM, blur=3, overlap=True, separation=None, show=True):
+    gray = copy.copy(img)
+    if show:
+        plt.imshow(gray)
+        plt.show()
+    if len(np.shape(gray))>2:
+        gray = cv2.cvtColor(gray, cv2.COLOR_BGR2GRAY)
+    
+    blurred_img = cv2.medianBlur(gray, blur)
+
+    circles = None
+    counter = 0
+    #plt.imshow(blurred_img)
+    print param
+    old_circles = None
+
+    while counter < param['thresh'][0]-1 :
+        #print (counter)
+        circles = cv2.HoughCircles(blurred_img.astype("uint8"), cv2.HOUGH_GRADIENT, 1, 20,
+                                       param1=param['thresh'][1],
+                                       param2=param['thresh'][0]-counter,
+                                       minRadius = param['radius'][0],
+                                       maxRadius = param['radius'][1])
+        if old_circles is None:
+            old_circles = circles
+        if overlap is False and circles is not None:
+            keep_circles = np.zeros_like(old_circles)
+            new_circles = circles
+            
+            for old_id, old_circle in enumerate(old_circles[0]):
+                idx = []
+                separation_list = linalg.norm(circles[:,:,:2]-[old_circle[:2]], axis=2)
+                idx.append(np.argmin(separation_list))
+                #print "old_new", np.shape(circles),np.shape(old_circles),separation_list
+                keep_circles[0][old_id] = circles[0][idx]
+
+            for circle in circles[0]:
+                #print "circle",circle, "keep",keep_circles
+                
+                keep_separation = linalg.norm([[circle[:2]]]-keep_circles[:,:,:2], axis=2)
+                #print "KEEP SEPERATION",keep_separation
+                if (sum(np.greater(keep_separation[0],separation)) == keep_separation[0].size).astype(np.int):
+                    print "COUNTERR: ", counter
+                    print "Separation from original circles: ", keep_separation
+                    print circle
+                    print (keep_separation > separation)
+                    print "IT IS A COMPLETELY SEPARATE CIRCLE"
+                    keep_circles = np.append(keep_circles, [[circle]], axis=1)
+                
+            circles = keep_circles        
+            
+        
+        if circles is not None and len(circles[0])>num_circles-1:
+            for circle in circles[0]:
+                print circle
+            print param['thresh'][0]-counter
+            print ('All Calibration points found')
+            break
+        
+        if counter==param['thresh'][0] and len(circles[0])<num_circles:
+            print "Found circles: ", circles
+        old_circles = circles
+
+        counter = counter + 1
+
+    if circles is None:
+        print ('No circles Detected, try changing param values')
+        return None
+    else:
+        cimg = cv2.cvtColor(gray,cv2.COLOR_GRAY2BGR)
+        #cimg = copy.copy(ir_img)
+        for i in circles[0,:]:
+                # draw the outer circle
+            cv2.circle(cimg,(int(i[0]),int(i[1])),int(i[2]),(0,0,255),1)
+                # draw the center of the ci~rcle
+            cv2.circle(cimg,(int(i[0]),int(i[1])),2,(0,0,255),1)
+
+        if show==True:
+            cv2.imshow("Calibration Points Identified", cimg)
+            cv2.imwrite("calibrated_image.jpg", cimg)
+            if cv2.waitKey():# & 0xFF == ord('q'):
+                print ("Quit")
+            cv2.destroyAllWindows()
+        return circles, cimg
+
