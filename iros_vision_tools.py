@@ -2,6 +2,7 @@ import numpy as np
 import cv2
 from matplotlib import pyplot as plt
 from scipy.spatial.distance import cdist
+from scipy import linalg
 #import imutils
 import copy
 
@@ -147,12 +148,10 @@ def sort_circles3(circles):
     return circles_sorted, crop_points
 
 
-def run_calibration(cali_image, adjust=True):
+def run_calibration(cali_image, cal_param = CAL_PARAM, adjust=True):
     cali_img = copy.copy(cali_image)
     
-    CAM_CAL_PARAM = {'thresh': [125, 160],
-                'radius': [8,10]}
-    circles, cimg = find_circles(copy.copy(cali_img), 3, param=CAM_CAL_PARAM, blur=1, show=False)
+    circles, cimg = find_circles2(copy.copy(cali_img), 3, param=cal_param, blur=1, overlap=False, separation=250,show=False)
     if adjust:
         while True:
             
@@ -160,16 +159,16 @@ def run_calibration(cali_image, adjust=True):
             plt.show()
             cal_check = raw_input("Change Calibration?: ")
             if cal_check == "yes":
-                print CAL_PARAM
+                print cal_param
                 r1 = int(raw_input("Radius 1: "))
                 r2 = int(raw_input("Radius 2: "))
                 t1 = int(raw_input("Thresh 1: "))
                 t2 = int(raw_input("Thresh 2: "))
                     
-                CAL_PARAM = {'thresh': [t1,t2],
+                cal_param = {'thresh': [t1,t2],
                              'radius': [r1, r2]}
-                print "New CAL_PARAM: ", CAL_PARAM
-                circles, cimg = find_circles(copy.copy(cali_img), 3, param=CAM_CAL_PARAM, blur=1, show=False)
+                print "New CAL_PARAM: ", cal_param
+                circles, cimg = find_circles(copy.copy(cali_img), 3, param=cal_param, blur=1, show=False)
             elif cal_check=="no":
                 break
     print np.shape(circles)
