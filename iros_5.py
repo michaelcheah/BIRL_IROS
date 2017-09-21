@@ -27,16 +27,18 @@ def begin(c,ser_ee):
         demand_Grip["act"]=act_usb
         msg = ic.safe_move(c,ser_ee,Pose=dict(iw.home_joints),Grip=demand_Grip,CMD=2)
 
-        # Go to waypoint to get correct orientation or the joints to come in from the side to pick
-        demand_Pose = dict(iw.grabbing_joints_waypoint)
-        msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
+        # Set tool to iros_1
+        ic.socket_send(c,sCMD=201)
 
-        demand_Pose["x"]=pos_u[0]+5
-        demand_Pose["z"]=height_u
+        # Go to waypoint to get correct orientation or the joints to come in from the side to pick
+        demand_Joints = dict(iw.grabbing_joints_waypoint)
+        msg = ic.safe_ur_move(c,Pose=demand_Joints,CMD=2)
+
+        current_Pose = ic.get_ur_position(c,1)
+        demand_Pose = {"x":pos_u[0]+5, "y":current_Pose[1], "z":height_u, "rx":current_Pose[3], "ry":current_Pose[4], "rz":current_Pose[5]}
         msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
         # Move forwards to the USB light
-        demand_Pose = dict(home)
         demand_Pose["y"] =pos_u[1]
         msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
@@ -54,13 +56,10 @@ def begin(c,ser_ee):
 
         time.sleep(5)
 
-        #Push in
+        #Push in and release
         demand_Pose["z"] = height_u - 5
-        msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
-
-        # Release Gripper
-        demand_Grip["servo"]=90
-        msg = ic.end_effector_move(ser_ee,demand_Grip)
+        demand_Grip["servo"]=120
+        msg = ic.safe_move(c,ser_ee,Pose=demand_Pose,Speed=0.25,Grip=demand_Grip,CMD=4)
 
     else:
         # Home position
@@ -68,9 +67,12 @@ def begin(c,ser_ee):
         demand_Grip["act"]=act_light
         msg = ic.safe_move(c,ser_ee,Pose=dict(iw.home_joints),Grip=demand_Grip,CMD=2)
 
+        # Set tool to iros_1
+        ic.socket_send(c,sCMD=201)
+
         # Goto position of light
-        demand_Pose["x"] = pos_light[0]
-        demand_Pose["y"] = pos_light[1]
+        current_Pose = ic.get_ur_position(c,1)
+        demand_Pose = {"x":pos_light[0], "y":pos_light[1], "z":current_Pose[2], "rx":current_Pose[3], "ry":current_Pose[4], "rz":current_Pose[5]}
         msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
         # Lower to light
@@ -82,13 +84,22 @@ def begin(c,ser_ee):
         msg = ic.end_effector_move(ser_ee,demand_Grip)
 
         # Pull out
-        demand_Pose["z"] =  height_light + 40
+        demand_Pose["z"] =  height_light + 50
         msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
-        # Push in
+        # Push in and release
         demand_Pose["z"] =  height_light  - 5
-        msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
-
-        # Release Gripper
         demand_Grip["servo"]=120
-        msg = ic.end_effector_move(ser_ee,demand_Grip)
+        msg = ic.safe_move(c,ser_ee,Pose=demand_Pose,Speed=0.25,Grip=demand_Grip,CMD=4)
+
+    # Raise
+    current_Pose = ic.get_ur_position(c,1)
+    demand_Pose = {"x":current_Pose[0], "y":current_Pose[1], "z":current_Pose[2]+50, "rx":current_Pose[3], "ry":current_Pose[4], "rz":current_Pose[5]}
+
+    # Set tool to iros_0
+    ic.socket_send(c,sCMD=200)
+
+    # Home position
+    msg = ic.safe_move(c,ser_ee,Pose=dict(iw.home_joints),CMD=2)
+
+    print ".....................Done......................"        
