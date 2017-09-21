@@ -120,7 +120,7 @@ def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
     time.sleep(0.5)
 
     # Lift spoon
-    demand_Pose["z"]=cup_height+spoon_height+80
+    demand_Pose["z"]=cup_height+spoon_height+120
     msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
     # Tilt spoon
@@ -144,7 +144,7 @@ def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
             msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
     ## Lift spoon
-    demand_Pose["z"]=cup_height+spoon_height+80
+    demand_Pose["z"]=cup_height+spoon_height+120
     msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
     ic.socket_send(c,sCMD=200)
