@@ -24,7 +24,7 @@ jug_waypoint_joints_2 = {"x": 76.25, "y": -73.27, "z": 141.24, "rx": -155.85, "r
 lift_height = 20
 pour_angle_1 = 60
 unpour = 90
-pour_offset
+pour_offset=70
 
 def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
     act_jug=70

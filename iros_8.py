@@ -45,7 +45,7 @@ def begin(c,ser_ee):
     msg = ic.safe_ur_move(c,Pose=dict(hammer_waypoint_joints_5),CMD=2, Speed = 0.1)
 
     # Now move to carterisan space and move along hitting nails
-	current_Pose = ic.get_ur_position(c,1)
+    current_Pose = ic.get_ur_position(c,1)
     demand_Pose = {"x":nail[0],"y":nail[1],"z":nail_up,"rx":current_Pose[3],"ry":current_Pose[4],"rz":current_Pose[5]}
     msg = ic.safe_ur_move(c,Pose= dict(demand_Pose), CMD =4)
     # Move along in the x, hitting down as we go

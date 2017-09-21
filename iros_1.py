@@ -24,9 +24,9 @@ saucer_waypoint2 = {"x": 0.0, "y": 0.0, "z": 0.0, "rx": 50.04, "ry": 122.78, "rz
 
 def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
     #object grasping parameters
-    act_mug=80
-    act_saucer=75
-    height_mug=20.0
+    act_mug=75
+    act_saucer=72
+    height_mug=25.0
     height_saucer=5.0
     radius_mug=43.0
     radius_saucer=45.0
@@ -97,7 +97,7 @@ def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
     demand_Pose["y"]=sy - radius_mug/1.41421
     msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
-    demand_Pose["z"]=height_mug+height_saucer
+    demand_Pose["z"]=height_mug+height_saucer+10
     msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
     demand_Grip["servo"]=120
@@ -134,14 +134,14 @@ def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
     time.sleep(0.5)
 
     current_Pose = ic.get_ur_position(c,1)
-    demand_Pose = {"x":current_Pose[0], "y":current_Pose[1], "z":current_Pose[2], "rx":i1.saucer_waypoint2["rx"], "ry":i1.saucer_waypoint2["ry"], "rz":i1.saucer_waypoint2["rz"]}
+    demand_Pose = {"x":current_Pose[0], "y":current_Pose[1], "z":current_Pose[2], "rx":saucer_waypoint2["rx"], "ry":saucer_waypoint2["ry"], "rz":saucer_waypoint2["rz"]}
     msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
     demand_Pose["z"]=height_saucer+50
     msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
-    x=float(raw_input("x: "))
-    y=float(raw_input("y: "))
+    x=-400#float(raw_input("x: "))
+    y=-400#float(raw_input("y: "))
 
     demand_Pose["x"]=x
     demand_Pose["y"]=y+radius_saucer
@@ -165,4 +165,4 @@ def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
 
     msg = ic.safe_move(c,ser_ee,Pose=dict(iw.home_joints),CMD=2)
    
-    print ".....................Done......................"
+print ".....................Done......................"

@@ -16,7 +16,7 @@ def cup_saucer(test_image, show=False):
 
     CAL_PARAM = {'thresh': [105, 140],
                 'radius': [30,85]}
-    circles2, cimg = ivt.find_circles(copy.copy(test_img), 2, param=CAL_PARAM, blur=1, show=False)
+    circles2, cimg = ivt.find_circles2(copy.copy(test_img), 2, param=CAL_PARAM, blur=1, overlap=True, separation=80, show=False)
 
     print len(circles[0])
     print len(circles2[0])
