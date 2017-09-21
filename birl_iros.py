@@ -86,11 +86,11 @@ def main():
     
     while True:
         task = raw_input("task: ")
-        if task == "s":
-            while True:
-                servo = int(raw_input())
-                ic.serial_send(ser_ee,"G",servo)
-                print "servo pos: ", servo
+        if task == "wp":
+            msg = ic.safe_ur_move(c,Pose=dict(i1.saucer_waypoint1_joints),CMD=2)
+            current_Pose = ic.get_ur_position(c,1)
+            demand_Pose = {"x":current_Pose[0], "y":current_Pose[1], "z":current_Pose[2], "rx":i1.saucer_waypoint2["rx"], "ry":i1.saucer_waypoint2["ry"], "rz":i1.saucer_waypoint2["rz"]}
+            msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
         if task == "1":
             print "Begin challenge 1..."
             i1.begin(c,ser_ee,p1,inverse,CAMERA,crop_points)
@@ -99,10 +99,10 @@ def main():
             i2.begin(c,ser_ee)
         if task == "3":
             print "Begin challenge 3..."
-            i3.begin(c,ser_ee)
+            i3.begin(c,ser_ee,p1,inverse,CAMERA,crop_points)
         if task == "4":
             print "Begin challenge 4..."
-            i4.begin(c,ser_ee)
+            i4.begin(c,ser_ee,p1,inverse,CAMERA,crop_points)
         if task == "5":
             print "Begin challenge 5..."
             i5.begin(c,ser_ee)
@@ -111,7 +111,7 @@ def main():
             i6.begin(c,ser_ee)
         if task == "7":
             print "Begin challenge 7..."
-            i7.begin(c,ser_ee)
+            i7.begin(c,ser_ee,p1,inverse,CAMERA,crop_points)
         if task == "8":
             print "Begin challenge 8..."
             i8.begin(c,ser_ee)

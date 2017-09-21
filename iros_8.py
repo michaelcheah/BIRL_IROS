@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # Scripts for iros challenge 8: pick up a hammer
 #                               use this to drive 5 nails into foam board
+# ic.serial_send(ser_ee,"H",var)  0-127
 import time
 import copy
 import math
@@ -13,72 +14,52 @@ import iros_interface_cmds as ic
 import iros_waypoints as iw
 #import vision_copy as vc
 
-nail_waypoint_joints = {"x": 0.0, "y": 0.0, "z": 0.0, "rx": 0.0, "ry": 0.0, "rz": 0.0}
+hammer_waypoint_joints_1 = {"x": 1.16, "y": -68.88, "z": 73.40, "rx": -94.51, "ry": -89.69, "rz": 141.78}
+hammer_waypoint_joints_2 = {"x": 1.16, "y": -68.88, "z": 73.40, "rx": -94.51, "ry": -89.69, "rz": 141.78}
+hammer_waypoint_joints_3 = {"x": -18.53, "y": -52.93, "z": 75.96, "rx": 22.47, "ry": -25.38, "rz": 2.46}
+hammer_waypoint_joints_4 = {"x": -18.53, "y": -52.93, "z": 75.96, "rx": 22.47, "ry": -25.38, "rz": 2.46}
+
+nail = [0, -300]
+nail_up = 80
+nail_down = 50
 
 def begin(c,ser_ee):
-    hx=-300
-    hy=-600
-    hz=30
-    nx=[-600,-600,-600,-600,-600]
-    ny=[-200,-250,-300,-350,-400]
-    nz=30
-    act_hammer=70
-
-    #motion stuff: pick mug
     # Home
-    demand_Grip = dict(iw.ee_home)
-    demand_Grip["act"]=act_mug
-    msg = ic.safe_move(c,ser_ee,Pose=dict(iw.home_joints),Grip=demand_Grip,CMD=2)    
-    
-    # Set tool to iros_1
-    ic.socket_send(c,sCMD=201)
+    msg = ic.safe_move(c,ser_ee,Pose=dict(iw.home_joints),Grip=demand_Grip,CMD=2)
 
-    current_Joints = ic.get_ur_position(c,CMD=3)
-    demand_Joints = {"x":current_Joints[0], "y":current_Joints[1], "z":current_Joints[2], "rx":current_Joints[3], "ry":current_Joints[4], "rz":current_Joints[5]+45} 
-    msg = ic.safe_ur_move(c,Pose=demand_Joints,CMD=2)
+    # Move towards hammer using waypoints
+    msg = ic.safe_ur_move(c,Pose=dict(hammer_waypoint_joints_1),CMD=2)
+    msg = ic.safe_ur_move(c,Pose=dict(hammer_waypoint_joints_2),CMD=2)
+    msg = ic.safe_ur_move(c,Pose=dict(hammer_waypoint_joints_3),CMD=2)
 
-    current_Pose = ic.get_ur_position(c,1)
-    demand_Pose = {"x":hx, "y":hy, "z":current_Pose[2], "rx":current_Pose[3], "ry":current_Pose[4], "rz":current_Pose[5]} 
-    msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
+    # Move slowly towards the hammer
+    msg = ic.safe_ur_move(c,Pose=dict(hammer_waypoint_joints_4),CMD=2, Speed = 0.1)
 
-    demand_Pose["z"]=hz
-    msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
+    # Close hammer servo
+    ic.serial_send(ser_ee,"H",100)
 
-    demand_Grip["servo"]=0
-    msg = ic.end_effector_move(ser_ee,Grip=demand_Grip)
+    # Pick up hammer (waypoint)
+    msg = ic.safe_ur_move(c,Pose=dict(hammer_waypoint_joints_5),CMD=2, Speed = 0.1)
 
-    demand_Pose["z"]=hz+100
-    msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
+    # Move to the first nail_waypoint_joints
+    msg = ic.safe_ur_move(c,Pose=dict(hammer_waypoint_joints_5),CMD=2, Speed = 0.1)
 
-    msg = ic.safe_ur_move(c,Pose=dict(nail_waypoint_joints),CMD=2)
-
-    current_Pose = ic.get_ur_position(c,1)
-    for i in range(0,5):
-        demand_Pose = {"x":nx[i], "y":ny[i], "z":current_Pose[2], "rx":current_Pose[3], "ry":current_Pose[4], "rz":current_Pose[5]} 
-        msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
-
-        for j in range(0,2):
-            demand_Pose["z"]=nz+100
-            msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
-
-            demand_Pose["z"]=nz
-            msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
-
-        demand_Pose["z"]=current_Pose[2]
-        msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
-
+    # Now move to carterisan space and move along hitting nails
+	current_Pose = ic.get_ur_position(c,1)
+    demand_Pose = {"x":nail[0],"y":nail[1],"z":nail_up,"rx":current_Pose[3],"ry":current_Pose[4],"rz":current_Pose[5]}
+    msg = ic.safe_ur_move(c,Pose= dict(demand_Pose), CMD =4)
+    # Move along in the x, hitting down as we go
+    for i in range (0, 15):
+        # move
+        demand_Pose["x"] = demand_Pose["x"] + i*5
+        msg = ic.safe_ur_move(c,Pose= dict(demand_Pose), CMD = 4)
+        #down
+        demand_Pose["z"]= nail_down
+        msg = ic.safe_ur_move(c,Pose= dict(demand_Pose), CMD = 4)
         time.sleep(0.5)
-
-    msg = ic.safe_ur_move(c,Pose=dict(nail_waypoint_joints),CMD=2)
-
-    current_Pose = ic.get_ur_position(c,1)
-    demand_Pose = {"x":current_Pose[0], "y":current_Pose[1], "z":hx+20, "rx":current_Pose[3], "ry":current_Pose[4], "rz":current_Pose[5]} 
-    demand_Grip["servo"]=80
-    msg = ic.safe_move(c,ser_ee,Pose=demand_Pose,CMD=4)
-
-    demand_Pose["z"]=current_Pose[2]
-    msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
-
+        #up
+        demand_Pose["z"]= nail_up
+        msg = ic.safe_ur_move(c,Pose= dict(demand_Pose), CMD = 4)
     ic.socket_send(c,sCMD=200)
 
     msg = ic.safe_move(c,ser_ee,Pose=dict(iw.home_joints),CMD=2)
