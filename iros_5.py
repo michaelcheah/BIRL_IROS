@@ -17,7 +17,7 @@ height_u = 80
 
 pos_light = [-450, -400]        #
 height_light = 60               #
-act_light= 50
+act_light= 20
 
 
 def begin(c,ser_ee):
@@ -29,7 +29,9 @@ def begin(c,ser_ee):
 
         # Go to waypoint to get correct orientation or the joints to come in from the side to pick
         demand_Pose = dict(iw.grabbing_joints_waypoint)
-        demand_Pose["x"]=pos_u[0]
+        msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
+
+        demand_Pose["x"]=pos_u[0]+5
         demand_Pose["z"]=height_u
         msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
@@ -37,6 +39,10 @@ def begin(c,ser_ee):
         demand_Pose = dict(home)
         demand_Pose["y"] =pos_u[1]
         msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
+
+        # Move upto light
+        demand_Pose["x"]=pos_u[0]
+        msg = ic.safe_ur_move(c,Pose=demand_Pose, CMD=4, Speed=0.2)
 
         # Close Gripper
         demand_Grip["servo"]=30
@@ -53,15 +59,14 @@ def begin(c,ser_ee):
         msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
         # Release Gripper
-        demand_Grip["servo"]=120
+        demand_Grip["servo"]=90
         msg = ic.end_effector_move(ser_ee,demand_Grip)
 
     else:
         # Home position
         demand_Grip = dict(iw.ee_home)
         demand_Grip["act"]=act_light
-        demandPose =  dict(iw.home_joints)
-        msg = ic.safe_move(c,ser_ee,Pose=demandPose,Grip=demand_Grip,CMD=2)
+        msg = ic.safe_move(c,ser_ee,Pose=dict(iw.home_joints),Grip=demand_Grip,CMD=2)
 
         # Goto position of light
         demand_Pose["x"] = pos_light[0]
