@@ -14,7 +14,7 @@ import iros_waypoints as iw
 #import vision_copy as vc
 
 # Pre defined variables
-centre = [x, y]
+centre = [-400, -400]
 radius = 100
 height = 300
 act_paper = 78
@@ -33,7 +33,7 @@ def begin(c,ser_ee):
     move_dx = r*math.cos(ori)* 180/math.pi
     move_dy = r*math.sin(ori)* 180/math.pi
 
-    for i in range(0, len(ori)+1)
+    for i in range(0, len(ori)+1):
         # Home
         msg = ic.safe_move(c,ser_ee,Pose=dict(iw.home_joints),Grip=demand_Grip,CMD=2)
 
