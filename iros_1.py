@@ -31,10 +31,11 @@ def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
     radius_mug=43.0
     radius_saucer=45.0
     
-    task_img_1 = ivt.capture_pic(CAMERA,1)
+    task_img_1 = ivt.capture_pic(CAMERA,3)
     cv2.imwrite(os.path.join(PATH_TO_TASK_IMAGES, 'task_img_1.jpg'), task_img_1)
     crop_task_img_1 = ivt.crop_out(task_img_1, crop_points)
-    table_circles = ivfunc.cup_saucer(crop_task_img_1, show=True)
+    table_circles = ivfunc.cup_saucer2(crop_task_img_1, show=True)
+    print table_circles
     print "CROP_POINTS: ", crop_points
     print "P1: ", p1
     print "INVERSE", inverse
