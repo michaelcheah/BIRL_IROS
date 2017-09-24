@@ -9,8 +9,8 @@ import copy
 CAMERA=0
 PORTS=3
 
-CAL_PARAM = {'thresh': [65,100],
-            'radius': [4, 9]}
+CAL_PARAM = {'thresh': [120,200],
+            'radius': [13, 15]}
 
 # Calibration coordinates
 CAL_XOFF = 1.0
