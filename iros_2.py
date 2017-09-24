@@ -14,18 +14,18 @@ import iros_waypoints as iw
 #import vision_copy as vc
 
 #Joint positions for the picking ( just above)
-pick_f = {"x": 84.25, "y": -73.27, "z": 141.24, "rx": -155.85, "ry": -0.83, "rz": -5.47}
-pick_k = {"x": 84.25, "y": -73.27, "z": 141.24, "rx": -155.85, "ry": -0.83, "rz": -5.47}
-pick_s = {"x": 84.25, "y": -73.27, "z": 141.24, "rx": -155.85, "ry": -0.83, "rz": -5.47}
+pick_f = {"x": 77.82, "y": -86.76, "z": 105.13, "rx": -102.76, "ry": -92.04, "rz":-58.57}
+pick_k = {"x": 71.52, "y": -84.93, "z": 112.03, "rx": -111.79, "ry": -92.66, "rz":-64.81}
+pick_s = {"x": 85.44, "y": -85.50, "z": 105.73, "rx": -104.36, "ry": -91.28, "rz": -50.97}
 
 
 #Joint positions for the placing
 pick_f = {"x": 84.25, "y": -73.27, "z": 141.24, "rx": -155.85, "ry": -0.83, "rz": -5.47}
 pick_k = {"x": 84.25, "y": -73.27, "z": 141.24, "rx": -155.85, "ry": -0.83, "rz": -5.47}
-pick_s = {"x": 84.25, "y": -73.27, "z": 141.24, "rx": -155.85, "ry": -0.83, "rz": -5.47}
+pick_s = {"x": 22.63, "y": -77.99, "z": 95.92, "rx": -109.28, "ry": -90.67, "rz": -189.17}
 
-pick_height = 10
-place_height = 5
+pick_height = 4.75
+place_height = 4.75
 
 act_f = 75
 act_k = 75
@@ -254,7 +254,7 @@ def begin(c,ser_ee):
 
     # Raise
     msg = ic.safe_move(c,ser_ee,Pose=dict(pick_k),CMD=2)
-    
+
     msg = ic.safe_move(c,ser_ee,Pose=dict(iw.home_joints),CMD=2)
 
     print ".....................Done......................"
