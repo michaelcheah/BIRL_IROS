@@ -168,7 +168,8 @@ def run_calibration(cali_image, cal_param = CAL_PARAM, adjust=True):
                 cal_param = {'thresh': [t1,t2],
                              'radius': [r1, r2]}
                 print "New CAL_PARAM: ", cal_param
-                circles, cimg = find_circles(copy.copy(cali_img), 3, param=cal_param, blur=1, show=False)
+                circles, cimg = find_circles2(copy.copy(cali_img), 3, param=cal_param, blur=1, 
+                                              overlap=False, separation=250,show=False)
             elif cal_check=="no":
                 break
     print np.shape(circles)
@@ -337,12 +338,12 @@ def find_circles2(img, num_circles, param=CAL_PARAM, blur=3, overlap=True, separ
         #cimg = copy.copy(ir_img)
         for i in circles[0,:]:
                 # draw the outer circle
-            cv2.circle(cimg,(int(i[0]),int(i[1])),int(i[2]),(0,0,255),1)
+            cv2.circle(cimg,(int(i[0]),int(i[1])),int(i[2]),(0,255,0),1)
                 # draw the center of the ci~rcle
-            cv2.circle(cimg,(int(i[0]),int(i[1])),2,(0,0,255),1)
+            cv2.circle(cimg,(int(i[0]),int(i[1])),2,(0,255,0),1)
 
         if show==True:
-            cv2.imshow("Calibration Points Identified", cimg)
+            cv2.imshow("Points Identified", cimg)
             cv2.imwrite("calibrated_image.jpg", cimg)
             if cv2.waitKey():# & 0xFF == ord('q'):
                 print ("Quit")

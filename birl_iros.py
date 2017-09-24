@@ -33,6 +33,8 @@ import iros_10 as i10
 import iros_vision_functions as ivfunc
 import iros_vision_tools as ivt
 
+ROTATION = 3
+
 def initialize():
     #HOST = "169.254.103.235" # The remote host
     HOST = "192.168.1.105" # The remote host
@@ -141,7 +143,7 @@ def main():
             while True:
                 ready = raw_input("Ready?: ")
                 if ready == "yes":
-                    cali_img = ivt.capture_pic(CAMERA,1)
+                    cali_img = ivt.capture_pic(CAMERA,ROTATION)
                     circles_sorted, crop_points = ivt.run_calibration(cali_img)
                     cali_circles_init = circles_sorted-circles_sorted[0][0]
                     cali_circles=[]

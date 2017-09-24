@@ -16,7 +16,7 @@ def cup_saucer(test_image, show=False):
 
     CAL_PARAM = {'thresh': [105, 140],
                 'radius': [30,85]}
-    circles2, cimg = ivt.find_circles2(copy.copy(test_img), 2, param=CAL_PARAM, blur=1, overlap=True, separation=80, show=False)
+    circles2, cimg = ivt.find_circles2(copy.copy(test_img), 2, param=CAL_PARAM, blur=1, overlap=True, separation=180, show=False)
 
     print len(circles[0])
     print len(circles2[0])
@@ -49,6 +49,54 @@ def cup_saucer(test_image, show=False):
         cv2.circle(cimg,(int(member["circle"][0]),int(member["circle"][1])),int(member["circle"][2]),color,1)
                     # draw the center of the ci~rcle
         cv2.circle(cimg,(int(member["circle"][0]),int(member["circle"][1])),2,color,1)
+    if show==True:
+        plt.imshow(cimg)
+        plt.show()
+
+    return table_circles
+
+def cup_saucer2(test_image, show=False):
+    test_img = copy.copy(test_image)
+
+    CAL_PARAM = {'thresh': [105, 140],
+                'radius': [25,55]}
+    
+    circles2, cimg = ivt.find_circles2(copy.copy(test_img), 2, param=CAL_PARAM, blur=1, overlap=False, 
+                                       separation=80, show=False)
+    
+    print len(circles2[0])
+    
+    
+
+    table_circles = {}
+    store = []
+    for j,i in enumerate(circles2[0]):
+        circle_info = {}
+        circle_info["id"] = j
+        coords = np.array([i[:-1]])
+        
+        radius = i[-1]
+        circle_info["radius"] = radius
+        circle_info["circle"]=i
+        num = 0
+        store.append(circle_info)
+    
+    if store[0]["radius"]>store[0]["radius"]:
+        table_circles["saucer"]=store[0]
+        table_circles["mug"]=store[1]
+    else:
+        table_circles["mug"]=store[0]
+        table_circles["saucer"]=store[1]
+    
+    cv2.circle(cimg,(int(table_circles["saucer"]["circle"][0]),
+                     int(table_circles["saucer"]["circle"][1])),
+               int(table_circles["saucer"]["circle"][2]),
+               (0,255,0),1)
+                # draw the center of the ci~rcle
+    cv2.circle(cimg,(int(table_circles["mug"]["circle"][0]),
+                     int(table_circles["mug"]["circle"][1])),
+               int(table_circles["mug"]["circle"][2]),
+               (0,0,255),1)
     if show==True:
         plt.imshow(cimg)
         plt.show()
