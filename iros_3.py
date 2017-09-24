@@ -20,23 +20,29 @@ import iros_vision_functions as ivfunc
 PATH_TO_TASK_IMAGES = "task_images"
 
 stir_waypoint_joints = {"x": 46.91, "y": -83.89, "z": 78.77, "rx": -78.57, "ry": -95.53, "rz": 4.40}
+ROTATION=3
 
 def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
     ## Object parameters
     cup_radius = 40
     cup_height = 60
-    spoon_bowl = -20         # lenght of spoon bowl (to be convered when stirring)
+    spoon_bowl = -60         # lenght of spoon bowl (to be convered when stirring)
     spoon_height = 20
     stir_radius = cup_radius - 20
     act_spoon = 75
     
-    task_img_3 = ivt.capture_pic(CAMERA,1)
+    task_img_3 = ivt.capture_pic(CAMERA,ROTATION)
     cv2.imwrite(os.path.join(PATH_TO_TASK_IMAGES, 'task_img_3.jpg'), task_img_3)
     
     crop_task_img_3 = ivt.crop_out(task_img_3, crop_points)
     
-    img_3a = crop_task_img_3[0:180, 0:-1]
-    img_3b = ivt.black_out(crop_task_img_3, [180,-1,0,-1])
+    img_3a = crop_task_img_3[80:280, 80:230]
+    plt.imshow(img_3a)
+    #img_3b = ivt.black_out(crop_task_img_3, [180,-1,0,-1])
+    img_3b = copy.copy(crop_task_img_3)
+    img_3b[100:260, 80:230]=[0,0,0]
+    plt.imshow(img_3b)
+    plt.show()
     
     p_circle, spoon = ivfunc.find_spoon(img_3a, show=True)
     
@@ -45,14 +51,14 @@ def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
     #mx,my,sx,sy = mug_saucer_pos
     
     ## Location of first mug ()
-    p_pix = [p_circle[0][0],p_circle[0][1]]
+    p_pix = [80+p_circle[0][0],80+p_circle[0][1]]
     print "P_PIX: ", p_pix
     px,py = ivt.pix3world(p1, inverse, p_pix)
     px = px[0,0]
     py = py[0,0]
     
     print "SPOON: ", spoon
-    s_pix = [spoon[0][0], spoon[0][1]]
+    s_pix = [80+spoon[0][0], 80+spoon[0][1]]
     print "S_PIX: ", s_pix
     sx,sy = ivt.pix3world(p1, inverse, s_pix)
     sx = sx[0,0]
@@ -67,7 +73,7 @@ def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
     
     ## Location of Second Mug
     CAL_PARAM = {'thresh': [75, 100],
-                 'radius': [30,45]}
+                 'radius': [24,35]}
     m_circle, m_cimg = ivt.find_circles(copy.copy(img_3b), 1, param=CAL_PARAM, blur=1, show=False)
     plt.imshow(m_cimg)
     plt.show()
@@ -89,7 +95,7 @@ def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
     demand_Grip["act"] = act_spoon
     msg = ic.safe_move(c,ser_ee,Pose=dict(iw.home_joints),Grip=demand_Grip,CMD=2)
 
-    ic.socket_send(c,sCMD=201)
+    ic.socket_send(c,sCMD=203)
 
     # Goto spoon (TO FINISH)
     x_p, y_p, ori = get_grasping_coords(p_edge,p_centre)
@@ -99,7 +105,10 @@ def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
     angle_grasp(c,ser_ee,ori,attack_angle)
 
     current_Joints = ic.get_ur_position(c,3)
-    demand_Joints = {"x":current_Joints[0], "y":current_Joints[1], "z":current_Joints[2], "rx":current_Joints[3], "ry":current_Joints[4], "rz":current_Joints[5]+90}
+    if current_Joints[5] > 180:
+        demand_Joints = {"x":current_Joints[0], "y":current_Joints[1], "z":current_Joints[2], "rx":current_Joints[3], "ry":current_Joints[4], "rz":current_Joints[5]-90}
+    else:
+        demand_Joints = {"x":current_Joints[0], "y":current_Joints[1], "z":current_Joints[2], "rx":current_Joints[3], "ry":current_Joints[4], "rz":current_Joints[5]+90}
     msg = ic.safe_ur_move(c,Pose=demand_Joints,CMD=2)
 
     current_Pose = ic.get_ur_position(c,1)
@@ -127,8 +136,9 @@ def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
     msg = ic.safe_ur_move(c,Pose=dict(stir_waypoint_joints),CMD=2)
 
     ## Move to second cup x, y
+    ic.socket_send(c,sCMD=201)
     current_Pose = ic.get_ur_position(c,1)
-    demand_Pose = {"x":mx_2, "y":my_2, "z":cup_height+spoon_height+80, "rx":current_Pose[3], "ry":current_Pose[4], "rz":current_Pose[5]} 
+    demand_Pose = {"x":mx_2, "y":my_2, "z":current_Pose[2], "rx":current_Pose[3], "ry":current_Pose[4], "rz":current_Pose[5]} 
     msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
     ## Lower spoon
@@ -137,11 +147,11 @@ def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
 
     ## Stir spoon
     add_stir = [0, stir_radius, 0, -stir_radius, 0]
-    for j in range (0,2):
+    for j in range (0,3):
         for i in range (0,4):
             demand_Pose["x"]=mx_2 + add_stir[i+1]
             demand_Pose["y"]=my_2 + add_stir[i]
-            msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
+            msg = ic.safe_ur_move(c,Pose=demand_Pose,Speed=0.15,CMD=4)
 
     ## Lift spoon
     demand_Pose["z"]=cup_height+spoon_height+120

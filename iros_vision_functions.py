@@ -108,15 +108,16 @@ def find_spoon(image, show=True):
     edged, edg_img, cnts, hierarchy=ivt.extract_contours(copy.copy(img), 
                                                         min_thresh=25, 
                                                         max_thresh=200, 
-                                                        blur = 5, dilate=3, erode=0, 
+                                                        blur = 3, dilate=4, erode=1, 
                                                         cnt_mode = cv2.RETR_TREE)
     CAL_PARAM = {'thresh': [75, 100],
-                 'radius': [30,45]}
-    minsize=200
-    mindistance = 1000
-    box_minsize = 200
+                 'radius': [25,35]}
     
-    circles, cimg = ivt.find_circles(copy.copy(img), 1, param=CAL_PARAM, blur=1, show=False)
+    minsize=1
+    mindistance = 1000
+    box_minsize = 1
+    
+    circles, cimg = ivt.find_circles2(copy.copy(img), 1, param=CAL_PARAM, blur=1, show=False)
 
     show_img = copy.copy(img)
     show_img = cv2.cvtColor(show_img, cv2.COLOR_RGB2GRAY)
@@ -145,17 +146,24 @@ def find_spoon(image, show=True):
             print("Object at #{} REJECTED because BOX not big enough: ".format(cnt[0]), box_area)
             continue
         fnode = ivt.farthest_node([circles[0][0][0],circles[0][0][1]], current_outer_contour)
-
-    #print "FNODE: ", fnode
+    
     print "CIRCLE:", circles
     cv2.circle(show_img,(int(circles[0][0][0]),int(circles[0][0][1])),3,(0,255,0),5)
     cv2.circle(show_img, (fnode[0][0], fnode[0][1]), 3, (0,255,255),5)
-    
     if show:
+        plt.figure("Spoon and Cup")
+        plt.subplot(2,2,1)
         plt.imshow(show_img)
-        plt.figure()
+        cv2.imwrite("show_img.jpg",show_img)
+        plt.subplot(2,2,2)
         plt.imshow(cimg)
+        plt.subplot(2,2,3)
+        plt.imshow(edged)
         plt.show()
+    #print "FNODE: ", fnode
+    
+    
+
     return circles[0], fnode 
 from numpy import linalg
 
