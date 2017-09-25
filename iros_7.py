@@ -19,7 +19,10 @@ import iros_vision_functions as ivfunc
 PATH_TO_TASK_IMAGES = "task_images"
 
 # Pre defined parameters
-peg_loc =[[-300, -300],[-300, -300],[-300, -300],[-300, -300],[-300, -300]]
+x = -300
+y = -300
+
+peg_loc =[[x, y],[x + 100, y],[x + 200, y],[x + 300, y],[x + 400, y]]
 height_pick = 5
 height_place = 55
 
@@ -43,7 +46,7 @@ def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
             print "Expected "+str(5-i)+" more shapes"
             continue
         piece = shape_list[0]
-        
+
         print "SHAPE INFO: "
         print "SHAPE ID:   ", piece['shape']
         px1 = piece['point1'][0][0]
@@ -60,12 +63,12 @@ def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
         x2,y2 = ivt.pix3world(p1, inverse, pix2)
         x2 = x2[0,0]
         y2 = y2[0,0]
-        
+
         print "X1, Y1, X2, Y2: ", x1, y1, x2, y2
 
         params = [piece['shape'], x1, y1, x2, y2]
         x_n, y_n, orient = get_grasping_coords([x1, y1], [x2, y2])
-        
+
         print "X_N, Y_N, ORIENT: "
         print x_n, y_n, orient
 
@@ -76,7 +79,7 @@ def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
         ## Set orientation
         current_Joints = ic.get_ur_position(c,3)
     	demand_Joints = {"x":current_Joints[0],"y":current_Joints[1],"z":current_Joints[2],"rx":current_Joints[3],"ry":current_Joints[4],"rz":current_Joints[5]-orient+135}
-        msg = ic.safe_ur_move(c,Pose=demand_Joints,CMD=2)        
+        msg = ic.safe_ur_move(c,Pose=demand_Joints,CMD=2)
 
         # Go to X,Y centre of the location
 	current_Pose = ic.get_ur_position(c,1)
