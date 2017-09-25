@@ -35,14 +35,9 @@ def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
     cv2.imwrite(os.path.join(PATH_TO_TASK_IMAGES, 'task_img_3.jpg'), task_img_3)
     
     crop_task_img_3 = ivt.crop_out(task_img_3, crop_points)
-    
-    img_3a = crop_task_img_3[80:280, 80:230]
-    plt.imshow(img_3a)
-    #img_3b = ivt.black_out(crop_task_img_3, [180,-1,0,-1])
-    img_3b = copy.copy(crop_task_img_3)
-    img_3b[100:260, 80:230]=[0,0,0]
-    plt.imshow(img_3b)
-    plt.show()
+
+
+    spoon_mug, spoon_edge_world, empty_cup_centre = ivfunc.find_spoon2(crop_task_img_3, show=True)
     
     p_circle, spoon = ivfunc.find_spoon(img_3a, show=True)
     
@@ -51,14 +46,14 @@ def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
     #mx,my,sx,sy = mug_saucer_pos
     
     ## Location of first mug ()
-    p_pix = [80+p_circle[0][0],80+p_circle[0][1]]
+    p_pix = [spoon_mug[0],spoon_mug[1]]
     print "P_PIX: ", p_pix
     px,py = ivt.pix3world(p1, inverse, p_pix)
     px = px[0,0]
     py = py[0,0]
     
     print "SPOON: ", spoon
-    s_pix = [80+spoon[0][0], 80+spoon[0][1]]
+    s_pix = [spoon_edge_world[0], spoon_edge_world[1]]
     print "S_PIX: ", s_pix
     sx,sy = ivt.pix3world(p1, inverse, s_pix)
     sx = sx[0,0]
@@ -72,12 +67,7 @@ def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
     print "P_EDGE:   ", p_edge
     
     ## Location of Second Mug
-    CAL_PARAM = {'thresh': [75, 100],
-                 'radius': [24,35]}
-    m_circle, m_cimg = ivt.find_circles(copy.copy(img_3b), 1, param=CAL_PARAM, blur=1, show=False)
-    plt.imshow(m_cimg)
-    plt.show()
-    m_pix = [m_circle[0][0][0],m_circle[0][0][1]]
+    m_pix = [empty_cup_world[0],empty_cup_world[1]]
     mx,my = ivt.pix3world(p1, inverse, m_pix)
     mx_2 = mx[0,0]
     my_2 = my[0,0]

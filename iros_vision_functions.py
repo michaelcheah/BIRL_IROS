@@ -6,6 +6,9 @@ import cv2
 from scipy.spatial.distance import cdist
 from matplotlib import pyplot as plt
 
+import scipy
+
+
 
 def cup_saucer(test_image, show=False):
     test_img = copy.copy(test_image)
@@ -316,3 +319,171 @@ def detect(c):
     peri = cv2.arcLength(c, True)
     approx = cv2.approxPolyDP(c, 0.03 * peri, True)
     return approx
+
+def find_spoon2(image, show=True):
+    img = copy.copy(image)
+    
+    CAL_PARAM = {'thresh': [75, 100],
+                 'radius': [25,35]}
+    
+    CROP_RADIUS = 80
+    PADDING = 30
+    
+    circles, cimg = ivt.find_circles2(copy.copy(img), 2, param=CAL_PARAM, blur=1, show=False)
+    print "CIRCLES: ", circles
+    empty_cup_centre, empty_cup_id = ivt.farthest_node(np.array([180, 185]),
+                                                    np.array([[circles[0][0][0], circles[0][0][1]],
+                                                     [circles[0][1][0], circles[0][1][1]]]))
+    print "EMPTY_MUG_DISTANCE: ", np.array(empty_cup_centre)
+    
+    empty_circles = np.array([[circles[0][empty_cup_id]]])
+    spoon_circles = np.array([[circles[0][1-empty_cup_id]]])  
+    
+    sx, sy = int(spoon_circles[0][0][0]), int(spoon_circles[0][0][1])
+    print "SPOON_MUG_WORLD_CENTRE: ", sx, sy
+    
+    #img_3b = ivt.black_out(copy.copy(crop_task_img_3), [180,-1,0,-1])
+    img_3b = copy.copy(img)
+    
+    img_3b[sy-CROP_RADIUS+PADDING:sy+CROP_RADIUS-PADDING, sx-CROP_RADIUS+PADDING:sx+CROP_RADIUS-PADDING]=[0,0,0]
+    
+    print "EMPTY_CUP_WORLD: ",empty_circles
+    ex, ey, er = int(empty_circles[0][0][0]), int(empty_circles[0][0][1]), int(empty_circles[0][0][-1]+1)
+    
+    r,g,b = cv2.split(img)
+    
+    img_3a = copy.copy(img)
+    img_3a[ey-er:ey+er,ex-er:ex+er] = [r.mean(), g.mean(), b.mean()]
+    img_3a = img_3a[sy-CROP_RADIUS:sy+CROP_RADIUS, sx-CROP_RADIUS:sx+CROP_RADIUS]
+
+    
+    mug_centre = np.array([[sy,sx]])
+    cropped_mug_centre = np.array([[CROP_RADIUS, CROP_RADIUS]])
+    
+    print mug_centre
+    print cropped_mug_centre
+    
+    edged, edg_img, cnts, hierarchy=ivt.extract_contours(copy.copy(img_3a), 
+                                                        min_thresh=65, 
+                                                        max_thresh=240, 
+                                                        blur = 5, dilate=3, erode=2, 
+                                                        cnt_mode = cv2.RETR_TREE)
+    
+    
+
+    minsize=0
+    mindistance = 190
+    box_minsize = 0
+    minperi = 40
+    
+
+    
+    show_img = copy.copy(img)
+    show_img = cv2.cvtColor(show_img, cv2.COLOR_RGB2GRAY)
+    show_img = cv2.cvtColor(show_img, cv2.COLOR_GRAY2RGB)
+    fnode = np.array([CROP_RADIUS, CROP_RADIUS])
+    
+    for cnt in cnts:
+        peri = cv2.arcLength(cnt, True)
+        approx = cv2.approxPolyDP(cnt, 0.03 * peri, True)
+        current_outer_contour = []
+        for points in approx:
+            current_outer_contour.append(points[0])
+
+        distance = cdist(np.array(cropped_mug_centre),current_outer_contour)
+        print "CURRENT", np.shape(current_outer_contour)
+
+        if cv2.contourArea(cnt) < minsize:
+            print("Object at #{} REJECTED because CONTOUR not big enough: ".format(cnt[0]), cv2.contourArea(cnt))
+            continue
+            
+        if peri < minperi:
+            print("Object at #{} REJECTED because PERIMETER not long enough: ".format(cnt[0]), peri)
+            continue
+            
+
+        if distance[0][0] > mindistance:
+            print("Object at #{} REJECTED because not CLOSE ENOUGH: ".format(cnt[0]), distance[0][0])
+            continue
+        #mindistance = distance[0][0]
+
+        box = ivt.extract_minBox(cnt)
+        box_area = cv2.contourArea(np.array([box]))
+        #box_area = abs((box[0][0]-box[2][0])*(box[1][1]-box[0][1]))
+        
+        if box_area < box_minsize:
+            print("Object at #{} REJECTED because BOX not big enough: ".format(cnt[0]), box_area)
+            continue
+            
+        print("Object at #{} ACCEPTED: ".format(cnt[0]))
+        print "    Contour Area: ",cv2.contourArea(cnt)
+        print "    Perimeter:    ",peri
+        print "    Distance:     ",distance[0][0]
+        print "    Box Area:     ",box_area
+        
+        fnode_test, fnode_test_id = ivt.farthest_node(cropped_mug_centre[0],  current_outer_contour)
+        # Make edge more accurate
+        fnode_testa = current_outer_contour[fnode_test_id+1]
+        fnode_testb = current_outer_contour[fnode_test_id-1]
+        
+        fnode_test_dist = cdist(np.array(cropped_mug_centre),np.array([fnode_test]))
+        
+        fnode_add = fnode_test
+        fnode_num = 1
+        if fnode_test_dist - cdist(np.array(cropped_mug_centre),np.array([fnode_testa]))<2:
+            print "HELLO"
+            print fnode_test_dist - cdist(np.array(cropped_mug_centre),np.array([fnode_testa]))
+            fnode_add = fnode_add + fnode_testa
+            fnode_num = fnode_num+1
+        
+        if fnode_test_dist - cdist(np.array(cropped_mug_centre),np.array([fnode_testb]))<2:
+            print "HELLO2"
+            print fnode_test_dist - cdist(np.array(cropped_mug_centre),np.array([fnode_testb]))
+            fnode_add = fnode_add + fnode_testb
+            fnode_num = fnode_num+1
+            
+        fnode_test_mean = fnode_add/fnode_num
+        print "FNODE MEAN: ", fnode_test_mean,
+        print "FNODE ORIG: ", fnode_test 
+        fnode_dist = cdist(np.array(cropped_mug_centre),np.array([fnode_test_mean]))
+        fnode_dist2 = cdist(np.array(cropped_mug_centre),np.array([fnode]))
+        print "FNODE_DISTANCES: ", fnode_dist, fnode_dist2,
+        if fnode_dist > fnode_dist2:
+            fnode = fnode_test_mean
+        print "FNODE: ", fnode
+        
+    print "CIRCLE:", spoon_circles
+    spoon_edge = fnode
+    if cdist(np.array(cropped_mug_centre), np.array([spoon_edge])) < 60:
+        print cropped_mug_centre
+        print spoon_edge
+        print "VECTOR!!!!", cdist(np.array(cropped_mug_centre), np.array([spoon_edge]))
+        fvect = spoon_edge-CROP_RADIUS
+        unit_fvect = fvect/scipy.linalg.norm(fvect)
+        spoon_edge = unit_fvect*70 + 80
+        
+    print "SPOON_EDGE: ", spoon_edge
+    
+    spoon_mug = np.array([sx,sy])
+    fnode_world = np.array([sx-CROP_RADIUS+fnode[0], sy-CROP_RADIUS+fnode[1]])
+    spoon_edge_world = [sx-CROP_RADIUS+int(spoon_edge[0]), sy-CROP_RADIUS+int(spoon_edge[1])]
+    
+    
+    cv2.circle(show_img,(int(spoon_mug[0]), int(spoon_mug[1])),3,(0,255,0),5)
+    cv2.circle(show_img, (int(fnode_world[0]), int(fnode_world[1])), 3, (0,255,255),5)
+    cv2.circle(show_img, (int(spoon_edge_world[0]), int(spoon_edge_world[1])), 3, (255,0,255),5)
+    if show:
+        plt.figure("Spoon and Cup", figsize = [9,9])
+        plt.subplot(2,2,1)
+        plt.imshow(show_img)
+        cv2.imwrite("show_img.jpg",show_img)
+        plt.subplot(2,2,2)
+        plt.imshow(cimg)
+        plt.subplot(2,2,3)
+        plt.imshow(edged)
+        plt.subplot(2,2,4)
+        plt.imshow(img_3a)
+        plt.show()
+    #print "FNODE: ", fnode
+    
+    return spoon_mug, spoon_edge_world, empty_cup_centre
