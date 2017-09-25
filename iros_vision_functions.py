@@ -282,7 +282,7 @@ def extract_shape_list(image, threshold, show=True):
             shape = 4
             point1 = approx[0]
             point2 = (approx[2]+approx[3])/2
-            direction = (point1-point2)/linalg.norm(point1-point2)
+            direction = (point2-point1)/linalg.norm(point1-point2)
         else:
             shape = 0
             radius = centre - approx[0]
@@ -292,6 +292,7 @@ def extract_shape_list(image, threshold, show=True):
             
         dir_rat = direction[0][1]/-direction[0][0]
         angle = np.arctan(dir_rat)*180/np.pi
+        point1 = point1-direction*8
         
         shape_object['ratio']=dir_rat
         shape_object['angle'] = angle

@@ -11,13 +11,16 @@ import iros_waypoints as iw
 #import vision_copy as vc
 
 # Pre Determined stuff
-act_usb=70
+act_usb=78
 pos_u = [-400, -400]            # Location to go to for the USB
 height_u = 80
 
 pos_light = [-450, -400]        #
 height_light = 60               #
 act_light= 20
+
+usb1_down = {"x":67.21,"y":-107.33,"z":135.22,"rx":-127.32,"ry":-118.51,"rz":41.32}
+usb1_up =  {"x":67.21,"y":-110.09,"z":131.14,"rx":-120.49,"ry":-118.49,"rz":41.29}
 
 usb_joints_waypoint = {"x":-44.27,"y":-96.15,"z":104.97,"rx":-34.63,"ry":-46.86,"rz":-207.27}
 
@@ -31,26 +34,36 @@ def begin(c,ser_ee):
         # Set tool to iros_1
         ic.socket_send(c,sCMD=201)
 
-        # Go to waypoint to get correct orientation or the joints to come in from the side to pick
-        msg = ic.safe_ur_move(c,Pose=dict(usb_joints_waypoint),CMD=2)
+        # Close Gripper
+        msg = ic.end_effector_move(ser_ee,demand_Grip)
 
-        current_Pose = ic.get_ur_position(c,1)
-        demand_Pose = {"x":pos_u[0]+5, "y":current_Pose[1], "z":height_u, "rx":current_Pose[3], "ry":current_Pose[4], "rz":current_Pose[5]}
-        msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
-
-        # Move forwards to the USB light
-        demand_Pose["y"] =pos_u[1]
-        msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=8)
-
-        # Move upto light
-        demand_Pose["x"]=pos_u[0]
-        msg = ic.safe_ur_move(c,Pose=demand_Pose, CMD=4, Speed=0.2)
+        msg = ic.safe_ur_move(c,Pose=dict(usb1_down),CMD=2, Speed = 0.2)
 
         # Close Gripper
         demand_Grip["servo"]=30
         msg = ic.end_effector_move(ser_ee,demand_Grip)
 
         time.sleep(0.5)
+
+        raw= raw_input("wait")
+
+        current_Pose = ic.get_ur_position(c,1)
+        demand_Pose = {"x":current_Pose[0],"y":current_Pose[1],"z":current_Pose[2],"rx":current_Pose[3],"ry":current_Pose[4],"rz":current_Pose[5]}
+        demand_Pose["z"] = demand_Pose["z"] + 30
+        msg = ic.safe_move(c,ser_ee,Pose=demand_Pose,Grip=demand_Grip,Speed=0.2,CMD=4)	
+        
+        time.sleep(2)
+ 
+        msg = ic.safe_ur_move(c,Pose=dict(usb1_down),CMD=2, Speed = 0.2)
+        raw= raw_input("wati")
+
+        # Open Gripper
+        demand_Grip["servo"]=120
+        msg = ic.end_effector_move(ser_ee,demand_Grip)
+
+        time.sleep(0.5)
+
+
 
         #Pull out
         demand_Pose["z"] = height_u + 50
