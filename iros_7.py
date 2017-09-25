@@ -89,8 +89,6 @@ def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
         # Go to X,Y centre of the location
 	current_Pose = ic.get_ur_position(c,1)
         demand_Pose = {"x":x1,"y":y1,"z":current_Pose[2],"rx":current_Pose[3],"ry":current_Pose[4],"rz":current_Pose[5]}
-        demand_Pose["x"] = demand_Pose["x"] - 3
-        demand_Pose["y"] = demand_Pose["y"] - 3
         demand_Grip = dict(iw.ee_home)
         demand_Grip["act"]=act_objects[params[0]]-5
         msg = ic.safe_move(c,ser_ee,Pose=demand_Pose,Grip=demand_Grip,CMD=4)

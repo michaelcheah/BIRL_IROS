@@ -29,13 +29,13 @@ pour_offset=70
 
 def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
     #vision stuff
-    task_img_4 = ivt.capture_pic(CAMERA,1)
+    task_img_4 = ivt.capture_pic(CAMERA,3)
     cv2.imwrite(os.path.join(PATH_TO_TASK_IMAGES, 'task_img_4.jpg'), task_img_4)
 
     crop_task_img_4 = ivt.crop_out(task_img_4, crop_points)
     CAL_PARAM = {'thresh': [75, 100],
                  'radius': [30,45]}
-    m_circle, m_cimg = ivt.find_circles(copy.copy(img_4), 3, param=CAL_PARAM, blur=1, show=False)
+    m_circle, m_cimg = ivt.find_circles(copy.copy(crop_task_img_4), 3, param=CAL_PARAM, blur=1, show=False)
     plt.imshow(m_cimg)
     plt.show()
 
@@ -55,6 +55,9 @@ def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
     # Set tool to iros_1
     ic.socket_send(c,sCMD=201)
 
+    # Open grabber
+    ic.serial_send(ser_ee,"H",100)
+
     # Go to before jug
     msg = ic.safe_ur_move(c,Pose=dict(jug_waypoint_joints_1),CMD=2)
     time.sleep(0.5)
@@ -62,7 +65,7 @@ def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
     msg = ic.safe_ur_move(c,Pose=dict(jug_waypoint_joints_2),CMD=2)
 
     # Glose grabber
-    ic.serial_send(ser_ee,"H",100)
+    ic.serial_send(ser_ee,"H",15)
 
     test = raw_input("wait")
 
@@ -70,13 +73,15 @@ def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
     msg = ic.safe_ur_move(c,Pose=dict(jug_waypoint_joints_3),CMD=2)
 
     # Go to location of the cup
+    current_Pose = ic.get_ur_position(c,1)
+    demand_Pose = {"x":current_Pose[0],"y":current_Pose[1],"z":current_Pose[2],"rx":current_Pose[3],"ry":current_Pose[4],"rz":current_Pose[5]}	
     demand_Pose["x"] = mx[0] + pour_offset
     demand_Pose["y"] = my[0]
     msg = ic.safe_ur_move(c,Pose=dict(demand_Pose),CMD=4)
 
     # Pour
     current_Joints = ic.get_ur_position(c,3)
-    demand_Joints = dict(current_Joints)
+    demand_Joints = {"x":current_Joints[0],"y":current_Joints[1],"z":current_Joints[2],"rx":current_Joints[3],"ry":current_Joints[4],"rz":current_Joints[5]}	
     demand_Joints["rx"] = demand_Joints["rx"] + pour_angle_1
     msg = ic.safe_ur_move(c,Pose=dict(demand_Joints),CMD=2)
 
@@ -84,7 +89,7 @@ def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
 
     # Stop pour_angle_1
     demand_Joints["rx"] = demand_Joints["rx"] - pour_angle_1
-    msg = ic.safe_ur_move(c,Pose=dict(demand_Pose),CMD=2)
+    msg = ic.safe_ur_move(c,Pose=dict(demand_Joints),CMD=2)
 
     '''
     current_Pose = ic.get_ur_position(c,1)
