@@ -18,8 +18,9 @@ import iros_vision_tools as ivt
 import iros_vision_functions as ivfunc
 PATH_TO_TASK_IMAGES = "task_images"
 
-jug_waypoint_joints_1 = {"x": 35.87, "y": -46.09, "z": 48.92, "rx": -95.08, "ry": -93.37, "rz": -98.40}
-jug_waypoint_joints_2 = {"x": 76.25, "y": -73.27, "z": 141.24, "rx": -155.85, "ry": -0.83, "rz": -5.47}
+jug_waypoint_joints_1 = {"x":94.90, "y": -67.22, "z": 130.50, "rx": -154.92, "ry": 0.33, "rz": -268.18}
+jug_waypoint_joints_2 = {"x":83.98, "y": -67.23, "z": 130.50, "rx": -154.92, "ry": 0.33, "rz": -268.18}
+jug_waypoint_joints_3 = {"x":83.98, "y": -77.98, "z": 127.86, "rx": -145.65, "ry": -7.09, "rz": -264.06}
 
 lift_height = 20
 pour_angle_1 = 60
@@ -27,9 +28,6 @@ unpour = 90
 pour_offset=70
 
 def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
-    act_jug=70
-    pour_offset=100
-
     #vision stuff
     task_img_4 = ivt.capture_pic(CAMERA,1)
     cv2.imwrite(os.path.join(PATH_TO_TASK_IMAGES, 'task_img_4.jpg'), task_img_4)
@@ -59,13 +57,9 @@ def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
 
     # Go to before jug
     msg = ic.safe_ur_move(c,Pose=dict(jug_waypoint_joints_1),CMD=2)
+    time.sleep(0.5)
 
-    # Go into jug
-    current_Pose = ic.get_ur_position(c,1)
-    demand_Pose = {"x":current_Pose[0], "y":current_Pose[1], "z":current_Pose[2], "rx":current_Pose[3], "ry":current_Pose[4], "rz":current_Pose[5]}
-    demand_Pose["x"] =demand_Pose["x"] + 30
-    demand_Pose["y"] =demand_Pose["y"] - 30
-    msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=8)
+    msg = ic.safe_ur_move(c,Pose=dict(jug_waypoint_joints_2),CMD=2)
 
     # Glose grabber
     ic.serial_send(ser_ee,"H",100)
@@ -73,13 +67,7 @@ def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
     test = raw_input("wait")
 
     # Lift up
-
-    current_Pose = ic.get_ur_position(c,1)
-    demand_Pose = {"x":current_Pose[0], "y":current_Pose[1], "z":current_Pose[2], "rx":current_Pose[3], "ry":current_Pose[4], "rz":current_Pose[5]}
-    demand_Pose["z"]= demand_Pose["z"]+100
-    msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
-
-
+    msg = ic.safe_ur_move(c,Pose=dict(jug_waypoint_joints_3),CMD=2)
 
     # Go to location of the cup
     demand_Pose["x"] = mx[0] + pour_offset
