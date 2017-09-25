@@ -25,7 +25,7 @@ place_k = {"x": 77.82, "y": -86.76, "z": 105.13, "rx": -102.76, "ry": -92.04, "r
 place_s = {"x": 26.63, "y": -77.99, "z": 95.92, "rx": -109.28, "ry": -90.67, "rz": -189.17}
 
 pick_height = -14.0
-place_height = 4.75
+place_height = -17.0
 
 act_f = 70
 act_k = 70
@@ -36,42 +36,42 @@ def begin(c,ser_ee):
     demand_Grip = dict(iw.ee_home)
     demand_Grip["act"]=act_f
     msg = ic.safe_move(c,ser_ee,Pose=dict(iw.home_joints),Grip=demand_Grip,CMD=2)
-    
+
     ipt = raw_input("continue")
 
     # Go to just above fork place_height
     msg = ic.safe_move(c,ser_ee,Pose=dict(pick_f),CMD=2)
-    ipt = raw_input("continue")
+    #ipt = raw_input("continue")
     #Go down in the z to pick up the fork
     current_Pose = ic.get_ur_position(c,1)
     demand_Pose = {"x":current_Pose[0]+12, "y":current_Pose[1], "z":current_Pose[2], "rx":current_Pose[3], "ry":current_Pose[4], "rz":current_Pose[5]}
     demand_Pose["z"] = pick_height
-    msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)    
+    msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
     # Close the gripper
     demand_Grip["servo"]=30
     msg = ic.end_effector_move(ser_ee,demand_Grip)
     time.sleep(1)
-    
+
     ipt = raw_input("continue")
     # Raise
     msg = ic.safe_ur_move(c,Pose=dict(pick_f),CMD=2)
-    
-    ipt = raw_input("continue")
+
+    #ipt = raw_input("continue")
     # Go to place the fork
     msg = ic.safe_ur_move(c,Pose=dict(place_f),CMD=2)
-    ipt = raw_input("continue")
+    #ipt = raw_input("continue")
     # Lower the fork
     current_Pose = ic.get_ur_position(c,1)
     demand_Pose = {"x":current_Pose[0], "y":current_Pose[1], "z":current_Pose[2], "rx":current_Pose[3], "ry":current_Pose[4], "rz":current_Pose[5]}
     demand_Pose["z"] = place_height
-    msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)    
+    msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
     # Release
     demand_Grip["servo"]=120
     msg = ic.end_effector_move(ser_ee,demand_Grip)
     time.sleep(1)
-    ipt = raw_input("continue")
+    #ipt = raw_input("continue")
     # Raise arm
     msg = ic.safe_ur_move(c,Pose=dict(place_f),CMD=2)
     test = raw_input("Go on to spoon?")
@@ -88,7 +88,7 @@ def begin(c,ser_ee):
     current_Pose = ic.get_ur_position(c,1)
     demand_Pose = {"x":current_Pose[0]+10, "y":current_Pose[1], "z":current_Pose[2], "rx":current_Pose[3], "ry":current_Pose[4], "rz":current_Pose[5]}
     demand_Pose["z"] = pick_height
-    msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)    
+    msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
     # Close the gripper
     demand_Grip["servo"]=30
@@ -105,7 +105,7 @@ def begin(c,ser_ee):
     current_Pose = ic.get_ur_position(c,1)
     demand_Pose = {"x":current_Pose[0], "y":current_Pose[1], "z":current_Pose[2], "rx":current_Pose[3], "ry":current_Pose[4], "rz":current_Pose[5]}
     demand_Pose["z"] = place_height
-    msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)    
+    msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
     # Release
     demand_Grip["servo"]=120
@@ -122,14 +122,31 @@ def begin(c,ser_ee):
     msg = ic.end_effector_move(ser_ee,demand_Grip)
 
     # Go to just above spoon place_height
+    demand_Pose = dict{pick_k}
+    demand_Pose["x"] = demand_Pose["x"]  + 20
+    msg = ic.safe_ur_move(c,Pose=dict(pick_k),CMD=2)
+
+    # Go to low ish and then mostly close gripper
+    current_Pose = ic.get_ur_position(c,1)
+    demand_Pose = {"x":current_Pose[0]-2, "y":current_Pose[1], "z":current_Pose[2], "rx":current_Pose[3], "ry":current_Pose[4], "rz":current_Pose[5]}
+    demand_Pose["z"] = pick_height +15
+    msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
+
+    demand_Grip["servo"]=50
+    msg = ic.end_effector_move(ser_ee,demand_Grip)
+    time.sleep(1)
+
+    # Move sideways
+    demand_Pose = ic.get_ur_position(c,1)
+    demand_Pose["x"] = demand_Pose["x"] 
     msg = ic.safe_ur_move(c,Pose=dict(pick_k),CMD=2)
 
     #Go down in the z to pick up the fork
     current_Pose = ic.get_ur_position(c,1)
     demand_Pose = {"x":current_Pose[0]-2, "y":current_Pose[1], "z":current_Pose[2], "rx":current_Pose[3], "ry":current_Pose[4], "rz":current_Pose[5]}
     demand_Pose["z"] = pick_height -2
-    msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)  
-    
+    msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
+
 
     # Close the gripper
     demand_Grip["servo"]=30
@@ -146,7 +163,7 @@ def begin(c,ser_ee):
     current_Pose = ic.get_ur_position(c,1)
     demand_Pose = {"x":current_Pose[0], "y":current_Pose[1], "z":current_Pose[2], "rx":current_Pose[3], "ry":current_Pose[4], "rz":current_Pose[5]}
     demand_Pose["z"] = place_height
-    msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)      
+    msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
     # Release
     demand_Grip["servo"]=120
@@ -154,7 +171,7 @@ def begin(c,ser_ee):
     time.sleep(1)
 
     # Raise arm
-    msg = ic.safe_move(c,ser_ee,Pose=dict(place_k),CMD=2)
+    msg = ic.safe_ur_move(c,Pose=dict(place_k),CMD=2)
     test = raw_input("Go on to retrieve fork?")
 ###############################################################################
     # pick up fork
@@ -169,7 +186,7 @@ def begin(c,ser_ee):
     current_Pose = ic.get_ur_position(c,1)
     demand_Pose = {"x":current_Pose[0], "y":current_Pose[1], "z":current_Pose[2], "rx":current_Pose[3], "ry":current_Pose[4], "rz":current_Pose[5]}
     demand_Pose["z"] = place_height
-    msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)       
+    msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
     # Pick up fork
     demand_Grip["servo"]=30
@@ -177,14 +194,14 @@ def begin(c,ser_ee):
     time.sleep(1)
 
     # Lift and move above the tray for fokr
-    msg = ic.safe_ur_move(c,Pose=dict(pick_f),CMD=2)    
-    msg = ic.safe_ur_move(c,Pose=dict(place_f),CMD=2)    
+    msg = ic.safe_ur_move(c,Pose=dict(place_f),CMD=2)
+    msg = ic.safe_ur_move(c,Pose=dict(pick_f),CMD=2)
 
     # Lower
     current_Pose = ic.get_ur_position(c,1)
     demand_Pose = {"x":current_Pose[0], "y":current_Pose[1], "z":current_Pose[2], "rx":current_Pose[3], "ry":current_Pose[4], "rz":current_Pose[5]}
     demand_Pose["z"] = pick_height
-    msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)      
+    msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
     # Release
     demand_Grip["servo"]=120
@@ -201,14 +218,14 @@ def begin(c,ser_ee):
     demand_Grip["act"]=act_s
     msg = ic.end_effector_move(ser_ee,demand_Grip)
 
-    # Go abouve place of fork
+    # Go abouve place of spoon
     msg = ic.safe_ur_move(c,Pose=dict(place_s),CMD=2)
 
     # Lower
     current_Pose = ic.get_ur_position(c,1)
     demand_Pose = {"x":current_Pose[0], "y":current_Pose[1], "z":current_Pose[2], "rx":current_Pose[3], "ry":current_Pose[4], "rz":current_Pose[5]}
     demand_Pose["z"] = place_height
-    msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)       
+    msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
     # Pick up fork
     demand_Grip["servo"]=30
@@ -217,12 +234,12 @@ def begin(c,ser_ee):
 
     # Lift and move above the tray for fokr
     msg = ic.safe_ur_move(c,Pose=dict(place_s),CMD=2)
-    msg = ic.safe_ur_move(c,Pose=dict(pick_s),CMD=2)    
+    msg = ic.safe_ur_move(c,Pose=dict(pick_s),CMD=2)
     # Lower
     current_Pose = ic.get_ur_position(c,1)
     demand_Pose = {"x":current_Pose[0], "y":current_Pose[1], "z":current_Pose[2], "rx":current_Pose[3], "ry":current_Pose[4], "rz":current_Pose[5]}
     demand_Pose["z"] = pick_height
-    msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)      
+    msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
     # Release
     demand_Grip["servo"]=120
@@ -240,13 +257,13 @@ def begin(c,ser_ee):
     msg = ic.end_effector_move(ser_ee,demand_Grip)
 
     # Go abouve place of knife
-    msg = ic.safe_ur_move(c,Pose=dict(pick_k),CMD=2) 
+    msg = ic.safe_ur_move(c,Pose=dict(place_k),CMD=2)
 
     # Lower
     current_Pose = ic.get_ur_position(c,1)
     demand_Pose = {"x":current_Pose[0], "y":current_Pose[1], "z":current_Pose[2], "rx":current_Pose[3], "ry":current_Pose[4], "rz":current_Pose[5]}
     demand_Pose["z"] = place_height
-    msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)      
+    msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
     # Pick up fork
     demand_Grip["servo"]=30
@@ -255,13 +272,13 @@ def begin(c,ser_ee):
 
     # Lift and move above the tray for fokr
     msg = ic.safe_ur_move(c,Pose=dict(place_k),CMD=2)
-    msg = ic.safe_ur_move(c,Pose=dict(pick_k),CMD=2)   
+    msg = ic.safe_ur_move(c,Pose=dict(pick_k),CMD=2)
 
     # Lower
     current_Pose = ic.get_ur_position(c,1)
     demand_Pose = {"x":current_Pose[0], "y":current_Pose[1], "z":current_Pose[2], "rx":current_Pose[3], "ry":current_Pose[4], "rz":current_Pose[5]}
     demand_Pose["z"] = pick_height
-    msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)      
+    msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
     # Release
     demand_Grip["servo"]=120
@@ -269,7 +286,7 @@ def begin(c,ser_ee):
     time.sleep(1)
 
     # Raise
-    msg = ic.safe_ur_move(c,Pose=dict(pick_k),CMD=2)  
+    msg = ic.safe_ur_move(c,Pose=dict(pick_k),CMD=2)
 
     msg = ic.safe_move(c,ser_ee,Pose=dict(iw.home_joints),CMD=2)
 
