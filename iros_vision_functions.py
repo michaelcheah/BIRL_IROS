@@ -453,6 +453,8 @@ def find_spoon2(image, show=True):
         print "FNODE: ", fnode
         
     print "CIRCLE:", spoon_circles
+    spoon_mug = np.array([sx,sy])
+    #spoon_edge = fnode - (fnode-spoon_mug)*
     spoon_edge = fnode
     if cdist(np.array(cropped_mug_centre), np.array([spoon_edge])) < 60:
         print cropped_mug_centre

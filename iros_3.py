@@ -39,8 +39,6 @@ def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
 
     spoon_mug, spoon_edge_world, empty_cup_centre = ivfunc.find_spoon2(crop_task_img_3, show=True)
     
-    p_circle, spoon = ivfunc.find_spoon(img_3a, show=True)
-    
     #vision stuff: get mug and saucer position
     # mug and saucer centre positions
     #mx,my,sx,sy = mug_saucer_pos
@@ -52,7 +50,7 @@ def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
     px = px[0,0]
     py = py[0,0]
     
-    print "SPOON: ", spoon
+    print "SPOON: ", spoon_edge_world
     s_pix = [spoon_edge_world[0], spoon_edge_world[1]]
     print "S_PIX: ", s_pix
     sx,sy = ivt.pix3world(p1, inverse, s_pix)
@@ -67,7 +65,11 @@ def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
     print "P_EDGE:   ", p_edge
     
     ## Location of Second Mug
-    m_pix = [empty_cup_world[0],empty_cup_world[1]]
+    m_pix = [empty_cup_centre[0],empty_cup_centre[1]]
+    print "EMPTY_MUG_PIX: ", m_pix
+    m_pix = [empty_cup_centre[0],empty_cup_centre[1]+0.05*(250-empty_cup_centre[1])]
+    
+    print "CORRECTED_EMPTY_MUG_PIX: ", m_pix
     mx,my = ivt.pix3world(p1, inverse, m_pix)
     mx_2 = mx[0,0]
     my_2 = my[0,0]
