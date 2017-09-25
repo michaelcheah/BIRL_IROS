@@ -122,6 +122,23 @@ def begin(c,ser_ee):
     msg = ic.end_effector_move(ser_ee,demand_Grip)
 
     # Go to just above spoon place_height
+    demand_Pose = dict{pick_k}
+    demand_Pose["x"] = demand_Pose["x"]  + 20
+    msg = ic.safe_ur_move(c,Pose=dict(pick_k),CMD=2)
+
+    # Go to low ish and then mostly close gripper
+    current_Pose = ic.get_ur_position(c,1)
+    demand_Pose = {"x":current_Pose[0]-2, "y":current_Pose[1], "z":current_Pose[2], "rx":current_Pose[3], "ry":current_Pose[4], "rz":current_Pose[5]}
+    demand_Pose["z"] = pick_height +15
+    msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
+
+    demand_Grip["servo"]=50
+    msg = ic.end_effector_move(ser_ee,demand_Grip)
+    time.sleep(1)
+
+    # Move sideways
+    demand_Pose = ic.get_ur_position(c,1)
+    demand_Pose["x"] = demand_Pose["x"] 
     msg = ic.safe_ur_move(c,Pose=dict(pick_k),CMD=2)
 
     #Go down in the z to pick up the fork
