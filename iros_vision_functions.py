@@ -206,7 +206,8 @@ def extract_shape_contours(image, threshold=120, show=True):
         plt.subplot(1,2,2)
         plt.imshow(edged)
         plt.show()
-    
+    cv2.imwrite("edged_img.jpg", edged)
+    cv2.imwrite("gray_mask.jpg", gray_mask)
     return cnts, hierarchy
 
 def extract_shape_list(image, threshold, show=True):
@@ -231,6 +232,11 @@ def extract_shape_list(image, threshold, show=True):
         approx = detect(c)
         cmax = np.max(approx, axis = 0)
         cX, cY = cmax[0][0], cmax[0][1]
+
+        peri = cv2.arcLength(c, True)
+        if peri>300:
+            print "Perimeter too big: ", peri
+            continue
         
         cv2.drawContours(show_img, [approx], -1, (0,255,0), 1)
         
@@ -297,6 +303,7 @@ def extract_shape_list(image, threshold, show=True):
         cv2.circle(show_img, (int(point2[0][0]), int(point2[0][1])), 2, (255,0,255),2)
         cv2.putText(show_img, str(shape), (cX, cY), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
         shape_list.append(shape_object)
+    cv2.imwrite("labelled_shape.jpg",show_img)
     if show:
         plt.figure("Labelled Shapes")
         plt.imshow(show_img)
