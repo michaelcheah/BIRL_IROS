@@ -122,7 +122,7 @@ def begin(c,ser_ee):
     msg = ic.end_effector_move(ser_ee,demand_Grip)
 
     # Go to just above spoon place_height
-    demand_Pose = dict{pick_k}
+    demand_Pose = dict(pick_k)
     demand_Pose["x"] = demand_Pose["x"]  + 20
     msg = ic.safe_ur_move(c,Pose=dict(pick_k),CMD=2)
 

@@ -123,7 +123,11 @@ def main():
         if task == "10":
             print "Begin challenge 10..."
             i10.begin(c,ser_ee)
-
+        if task == "s":
+            print "Begin challenge s.."
+            ic.serial_send(ser_ee,"H",100)
+            time.sleep(1)
+            ic.serial_send(ser_ee,"H",20)           
         if task == "pose":
             current_Pose, current_Grip = ic.get_position(c,ser_ee,CMD=1)
             print "current pose: ", current_Pose

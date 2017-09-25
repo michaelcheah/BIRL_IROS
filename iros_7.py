@@ -23,11 +23,16 @@ x = -300
 y = -300
 
 peg_loc =[[x, y],[x + 100, y],[x + 200, y],[x + 300, y],[x + 400, y]]
-height_pick = 5
-height_place = 55
+height_pick = -18
+height_place = 30
 
-act_objects= [35, 32, 35, 35, 35, 35]
+act_objects= [30, 23, 25, 22, 35, 35]
 
+circle_way = {"x": 104.95, "y": -91.30, "z": 106.71, "rx": -102.23, "ry": -96.60, "rz": -226.57}
+rect_way = {"x": 102.90, "y": -103.98, "z": 118.74, "rx": -103.45, "ry": -89.90, "rz": -119.40}
+tri_way = {"x": 91.38, "y": -106.72, "z": 119.31, "rx": -99.18, "ry": -89.54, "rz": -134.62}
+square_way = {"x": 80.12, "y": -109.44, "z": 123.23, "rx": -100.73, "ry": 90.03, "rz": -143.64}
+pent_way = {"x": 80.12, "y": -109.44, "z": 123.23, "rx": -100.73, "ry": 90.03, "rz": -143.64}
 def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
     msg = ic.safe_move(c,ser_ee,Pose=dict(iw.home_joints),CMD=2)
 
@@ -35,7 +40,7 @@ def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
 
     for i in range(0,6):
         # Vision - Extract the list of shapes
-        task_img_7 = ivt.capture_pic(CAMERA,1)
+        task_img_7 = ivt.capture_pic(CAMERA,3)
         cv2.imwrite(os.path.join(PATH_TO_TASK_IMAGES, 'task_img_7'+str(i)+'.jpg'), task_img_7)
         crop_task_img_7 = ivt.crop_out(task_img_7, crop_points)
 
@@ -84,6 +89,8 @@ def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
         # Go to X,Y centre of the location
 	current_Pose = ic.get_ur_position(c,1)
         demand_Pose = {"x":x1,"y":y1,"z":current_Pose[2],"rx":current_Pose[3],"ry":current_Pose[4],"rz":current_Pose[5]}
+        demand_Pose["x"] = demand_Pose["x"] - 3
+        demand_Pose["y"] = demand_Pose["y"] - 3
         demand_Grip = dict(iw.ee_home)
         demand_Grip["act"]=act_objects[params[0]]-5
         msg = ic.safe_move(c,ser_ee,Pose=demand_Pose,Grip=demand_Grip,CMD=4)
@@ -111,13 +118,39 @@ def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
         demand_Pose["z"] = height_pick + 90
         msg = ic.safe_move(c,ser_ee,Pose=demand_Pose,Grip=demand_Grip,CMD=4)
 
+	if(params[0] == 0):
+		# Move to peg holder
+		location = peg_loc[params[0]]
+		#demand_Pose["x"] = location[0]
+		#demand_Pose["y"] = location[1]
+		msg = ic.safe_ur_move(c,Pose=dict(circle_way),CMD=2, Speed = 0.4)
 
-        # Move to peg holder
-        location = peg_loc[params[0]]
-        demand_Pose["x"] = location[0]
-        demand_Pose["y"] = location[1]
-        msg = ic.safe_move(c,ser_ee,Pose=demand_Pose,Grip=demand_Grip,CMD=4)
+	if(params[0] == 1):
+		# Move to peg holder
+		location = peg_loc[params[0]]
+		#demand_Pose["x"] = location[0]
+		#demand_Pose["y"] = location[1]
+		msg = ic.safe_ur_move(c,Pose=dict(rect_way),CMD=2, Speed = 0.4)
 
+	if(params[0] == 2):
+		# Move to peg holder
+		location = peg_loc[params[0]]
+		#demand_Pose["x"] = location[0]
+		#demand_Pose["y"] = location[1]
+		msg = ic.safe_ur_move(c,Pose=dict(tri_way),CMD=2, Speed = 0.1)
+	if(params[0] == 3):
+		# Move to peg holder
+		location = peg_loc[params[0]]
+		#demand_Pose["x"] = location[0]
+		#demand_Pose["y"] = location[1]
+		msg = ic.safe_ur_move(c,Pose=dict(square_way),CMD=2, Speed = 0.4)
+	if(params[0] == 4):
+		# Move to peg holder
+		location = peg_loc[params[0]]
+		#demand_Pose["x"] = location[0]
+		#demand_Pose["y"] = location[1]
+		msg = ic.safe_ur_move(c,Pose=dict(pent_way),CMD=2, Speed = 0.4)
+        '''
         # Rotate to zero wrist orientation
         current_Joints = ic.get_ur_position(c,3)
     	demand_Joints = {"x":current_Joints[0],"y":current_Joints[1],"z":current_Joints[2],"rx":current_Joints[3],"ry":current_Joints[4],"rz":0}
@@ -137,10 +170,11 @@ def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
         msg = ic.safe_ur_move(c,Pose=demand_Joints,CMD=2)
 
 	#test = raw_input("sasdf")
-
+        '''
         # Lower
         current_Pose = ic.get_ur_position(c,1)
         demand_Pose = {"x":current_Pose[0],"y":current_Pose[1],"z":height_place,"rx":current_Pose[3],"ry":current_Pose[4],"rz":current_Pose[5]}
+
         msg = ic.safe_move(c,ser_ee,Pose=demand_Pose,Grip=demand_Grip,Speed=0.2,CMD=4)
 
         # Release

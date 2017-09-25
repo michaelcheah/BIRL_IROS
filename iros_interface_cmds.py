@@ -50,7 +50,7 @@ def serial_send(ser_ee,id,var):
     # Wait for end effector arduino to finish
     while True:
         ipt = ser_ee.readline()
-        #print ipt
+        print ipt
         if ipt == "done\r\n":
             break
     return
