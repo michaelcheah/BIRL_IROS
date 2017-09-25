@@ -13,39 +13,49 @@ import iros_interface_cmds as ic
 import iros_waypoints as iw
 #import vision_copy as vc
 
+lid_joints = [{"x": 72.60, "y": -69.01, "z": 81.04, "rx": -94.34, "ry": -91.74, "rz": 30.52},
+              {"x": 74.46, "y": -70.66, "z": 84.36, "rx": -100.22, "ry": -96.86, "rz": -18.75},
+              {"x": 74.62, "y": -73.17, "z": 89.18, "rx": -108.25, "ry": -97.33, "rz": -61.22},
+              {"x": 73.19, "y": -75.42, "z": 93.32, "rx": -114.90, "ry": -93.47, "rz": -106.65},
+              {"x": 71.04, "y": -76.16, "z": 94.48, "rx": -115.95, "ry": -87.62, "rz": -149.86}]
 
 def begin(c,ser_ee):
 
     # parameters
-    bottle_radius = 15
-    bottle_height = 60
-    act_bottle = 60
+    bottle_radius = 25
+    bottle_height = 80
+    act_bottle = 30
 
     # Parameters to pass to the function
-    bx_1 = -400
-    by_1 = -400
+    bx_1 = -80
+    by_1 = -590
 
     demand_Grip = dict(iw.ee_home)
-    demand_Grip["act"]=87
-    demand_Grip["servo"]=45
-    demand_Grip["tilt"]=30
+    demand_Grip["act"]=act_bottle
     msg = ic.safe_move(c,ser_ee,Pose=dict(iw.home_joints),Grip=demand_Grip,CMD=2)
 
-    # Set tool to iros_1
+    # Set tool to iros_10
     ic.socket_send(c,sCMD=210)
 
     # Goto XY position for the bottle
     demand_Pose = dict(iw.home)
-    demand_Pose["x"] = bx_1 + bottle_radius/1.414
-    demand_Pose["y"] = by_1 - bottle_radius/1.414
+    demand_Pose["x"] = bx_1
+    demand_Pose["y"] = by_1
     msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
-    stored_Joints = ic.get_ur_position(c,3)
+    #stored_Joints = ic.get_ur_position(c,3)
 
     # Twist lid
-    tcp_rotate(c)
+    #tcp_rotate(c)
+    
+    for i in range(0,1):
+        for j in range(0,5):
+            msg = ic.safe_ur_move(c,Pose=dict(lid_joints[j]),Speed=0.15,CMD=2)
+        current_Pose = ic.get_ur_position(c,1)
+        demand_Pose = {"x":current_Pose[0],"y":current_Pose[1],"z":current_Pose[2]+30,"rx":current_Pose[3],"ry":current_Pose[4],"rz":current_Pose[5]}
+        msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
     # Raise
-    current_Pose = ic.get_ur_position(c,1)
+    '''current_Pose = ic.get_ur_position(c,1)
     demand_Pose = {"x":current_Pose[0],"y":current_Pose[1],"z":current_Pose[2]+30,"rx":current_Pose[3],"ry":current_Pose[4],"rz":current_Pose[5]}
     msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
@@ -55,26 +65,35 @@ def begin(c,ser_ee):
     msg = ic.safe_ur_move(c,Pose=demand_Joints,CMD=2)
 
     # Twist lid
-    tcp_rotate(c)
-
+    tcp_rotate(c)'''
+    
+    # Set tool to iros_1
+    ic.socket_send(c,sCMD=201)
+ 
+    
     # Raise
-    current_Pose = ic.get_ur_position(c,1)
-    demand_Pose = {"x":current_Pose[0],"y":current_Pose[1],"z":current_Pose[2]+15,"rx":current_Pose[3],"ry":current_Pose[4],"rz":current_Pose[5]}
+    demand_Pose = dict(iw.home)
+    demand_Pose["x"] = bx_1 + bottle_radius/1.414
+    demand_Pose["y"] = by_1 - bottle_radius/1.414
     msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
-
-    # Open actuator
-    demand_Grip["act"]=act_bottle
-    msg = ic.end_effector_move(ser_ee,demand_Grip)
+    
+    demand_Pose = dict(iw.home)
+    demand_Pose["x"] = bx_1 + bottle_radius/1.414
+    demand_Pose["y"] = by_1 - bottle_radius/1.414    
 
     # Grasp lid
-    demand_Pose["z"]=current_Pose[2]+10
+    demand_Pose["z"]=bottle_height
     demand_Grip["servo"]=30
-    msg = ic.safe_move(c,ser_ee,Pose=demand_Pose,Grip=demand_Grip,CMD=4)
+    #msg = ic.safe_move(c,ser_ee,Pose=demand_Pose,Grip=demand_Grip,CMD=4)
+    msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
+    msg = ic.end_effector_move(ser_ee,demand_Grip)
 
     time.sleep(0.5)
 
     # Lift up
-    demand_Pose["z"] = current_Pose[2]+50
+    demand_Pose = dict(iw.home)
+    demand_Pose["x"] = bx_1 + bottle_radius/1.414
+    demand_Pose["y"] = by_1 - bottle_radius/1.414
     msg = ic.safe_ur_move(c,Pose=demand_Pose,CMD=4)
 
     # Set tool to iros_0
