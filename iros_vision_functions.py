@@ -8,6 +8,15 @@ from matplotlib import pyplot as plt
 
 import scipy
 
+PLUG_REL_CROP = [120, -150, -46, -19]
+PLUG_POINTS = [0, 22, 44, 66]
+PLUG_SPACE = 24
+PLUG_THRESH=-90
+
+USB_REL_CROP = [217, -95, -46, -19]
+USB_POINTS = [0, 10, 22, 32]
+USB_SPACE = 12
+USB_THRESH = 130
 
 
 def cup_saucer(test_image, show=False):
@@ -62,7 +71,7 @@ def cup_saucer2(test_image, show=False):
     test_img = copy.copy(test_image)
 
     CAL_PARAM = {'thresh': [105, 140],
-                'radius': [25,55]}
+                'radius': [25,50]}
     
     circles2, cimg = ivt.find_circles2(copy.copy(test_img), 2, param=CAL_PARAM, blur=1, overlap=False, 
                                        separation=80, show=False)
@@ -326,7 +335,7 @@ def find_spoon2(image, show=True):
     CAL_PARAM = {'thresh': [75, 100],
                  'radius': [25,35]}
     
-    CROP_RADIUS = 80
+    CROP_RADIUS = 90
     PADDING = 30
     
     circles, cimg = ivt.find_circles2(copy.copy(img), 2, param=CAL_PARAM, blur=1, show=False)
@@ -489,3 +498,58 @@ def find_spoon2(image, show=True):
     #print "FNODE: ", fnode
     
     return spoon_mug, spoon_edge_world, empty_cup_centre
+
+def find_usb(image, crop_points, params = [USB_REL_CROP, USB_POINTS, USB_SPACE, USB_THRESH], show=True):
+    img = copy.copy(image)
+    rel_crop = params[0]
+    box_points = params[1]
+    space = params[2]
+    threshold = params[3]
+    print params
+    usb_crop = [int(crop_points[0]+rel_crop[0]),
+                int(crop_points[1]+rel_crop[1]),
+                int(crop_points[2]+rel_crop[2]),
+                int(crop_points[2]+rel_crop[3])]
+    print usb_crop
+    box_img = img[usb_crop[0]:usb_crop[1], usb_crop[2]:usb_crop[3]]
+    
+    box_4 = box_img[box_points[0]:box_points[0]+space, 0:-1]
+    box_3 = box_img[box_points[1]:box_points[1]+space, 0:-1]
+    box_2 = box_img[box_points[2]:box_points[2]+space, 0:-1]
+    box_1 = box_img[box_points[3]:box_points[3]+space, 0:-1]
+    
+    usb_means = [np.mean(box_1), np.mean(box_2),np.mean(box_3),np.mean(box_4)]
+    plug_min = [np.min(box_1),np.min(box_2),np.min(box_3),np.min(box_4)]
+    print "MEANS: ",usb_means
+    print "MINS:  ",plug_min
+    
+    in_id = 0
+    if threshold>0:
+        for i,j in enumerate(usb_means):
+            if j<threshold:
+                in_id = i+1
+    else:
+        for i,j in enumerate(plug_min):
+            if j>-threshold:
+                in_id = i
+        if in_id == 3:
+            if plug_min[1]<-threshold:
+                in_id = 4
+    if show:
+        plt.figure()
+        plt.imshow(img)
+        plt.figure()
+        plt.imshow(box_img)
+
+        plt.figure()
+        plt.subplot(1,4,1)
+        plt.imshow(box_1)
+        plt.subplot(1,4,2)
+        plt.imshow(box_2)
+        plt.subplot(1,4,3)
+        plt.imshow(box_3)
+        plt.subplot(1,4,4)
+        plt.imshow(box_4)
+        
+        plt.show()
+    return in_id

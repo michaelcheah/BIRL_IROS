@@ -294,6 +294,7 @@ def find_circles2(img, num_circles, param=CAL_PARAM, blur=3, overlap=True, separ
             keep_circles = np.zeros_like(old_circles)
             new_circles = circles
             
+            
             for old_id, old_circle in enumerate(old_circles[0]):
                 idx = []
                 separation_list = linalg.norm(circles[:,:,:2]-[old_circle[:2]], axis=2)

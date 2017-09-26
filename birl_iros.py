@@ -107,7 +107,7 @@ def main():
             i4.begin(c,ser_ee,p1,inverse,CAMERA,crop_points)
         if task == "5":
             print "Begin challenge 5..."
-            i5.begin(c,ser_ee)
+            i5.begin(c,ser_ee,p1,inverse,CAMERA,crop_points)
         if task == "6":
             print "Begin challenge 6..."
             i6.begin(c,ser_ee)
@@ -119,7 +119,7 @@ def main():
             i8.begin(c,ser_ee)
         if task == "9":
             print "Begin challenge 9..."
-            i9.begin(c,ser_ee)
+            i9.begin(c,ser_ee,p1,inverse,CAMERA,crop_points)
         if task == "10":
             print "Begin challenge 10..."
             i10.begin(c,ser_ee)

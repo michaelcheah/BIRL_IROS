@@ -24,14 +24,14 @@ def begin(c,ser_ee):
     # parameters
     bottle_radius = 25
     bottle_height = 70
-    act_bottle = 35
+    act_bottle = 40
 
     # Parameters to pass to the function
     bx_1 = -80
     by_1 = -590
 
     demand_Grip = dict(iw.ee_home)
-    demand_Grip["act"]=act_bottle
+    demand_Grip["act"]=act_bottle-5
     msg = ic.safe_move(c,ser_ee,Pose=dict(iw.home_joints),Grip=demand_Grip,CMD=2)
 
     # Set tool to iros_10
@@ -79,10 +79,16 @@ def begin(c,ser_ee):
     demand_Pose["y"] = by_1 - bottle_radius/1.414
     msg = ic.safe_ur_move(c,Pose=dict(demand_Pose),CMD=4)
 
+    demand_Grip["servo"]=40
+    msg = ic.end_effector_move(ser_ee,demand_Grip)
+
     # Grasp lid
     demand_Pose["z"]=bottle_height
-    demand_Grip["servo"]=30
+    demand_Grip["act"]=act_bottle
     msg = ic.safe_move(c,ser_ee,Pose=dict(demand_Pose),Grip=demand_Grip,CMD=4)
+
+    demand_Grip["servo"]=25
+    msg = ic.end_effector_move(ser_ee,demand_Grip)
 
     time.sleep(0.5)
 

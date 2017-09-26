@@ -27,7 +27,7 @@ def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
     cup_radius = 40
     cup_height = 60
     spoon_bowl = -60         # lenght of spoon bowl (to be convered when stirring)
-    spoon_height = 20
+    spoon_height = 11
     stir_radius = cup_radius - 20
     act_spoon = 75
     
@@ -51,7 +51,7 @@ def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
     py = py[0,0]
     
     print "SPOON: ", spoon_edge_world
-    s_pix = [spoon_edge_world[0], spoon_edge_world[1]]
+    s_pix = [spoon_edge_world[0], spoon_edge_world[1]-10]
     print "S_PIX: ", s_pix
     sx,sy = ivt.pix3world(p1, inverse, s_pix)
     sx = sx[0,0]
@@ -77,15 +77,11 @@ def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
 
     # Home for end effector and actuator
     demand_Grip = dict(iw.ee_home)
-    demand_Grip["act"] = act_spoon
+    demand_Grip["act"] = act_spoon - 10
     msg = ic.safe_move(c,ser_ee,Pose=dict(iw.home_joints),Grip=demand_Grip,CMD=2)
 
     ic.socket_send(c,sCMD=201)
 
-    # Home for end effector and actuator
-    demand_Grip = dict(iw.ee_home)
-    demand_Grip["act"] = act_spoon
-    msg = ic.safe_move(c,ser_ee,Pose=dict(iw.home_joints),Grip=demand_Grip,CMD=2)
 
     ic.socket_send(c,sCMD=203)
 
@@ -117,6 +113,9 @@ def begin(c,ser_ee,p1,inverse,CAMERA,crop_points):
     # Grasp spoon
     demand_Grip["servo"]=30
     msg = ic.end_effector_move(ser_ee,demand_Grip)
+    
+    demand_Grip["act"]=act_spoon
+    msg = ic.end_effector_move(ser_ee,demand_Grip)    
 
     time.sleep(0.5)
 
